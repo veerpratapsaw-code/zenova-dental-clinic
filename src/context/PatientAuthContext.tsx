@@ -5,6 +5,11 @@ interface Patient {
   name: string;
   email: string;
   phone: string;
+  profilePic?: string;
+  address?: string;
+  dob?: string;
+  gender?: string;
+  medicalHistory?: string;
   isAdmin?: boolean;
 }
 
@@ -12,6 +17,7 @@ interface PatientAuthContextType {
   patient: Patient | null;
   token: string | null;
   loginPatient: (token: string, patientData: Patient) => void;
+  updatePatient: (patientData: Patient) => void;
   logoutPatient: () => void;
   isLoading: boolean;
 }
@@ -56,6 +62,10 @@ export function PatientAuthProvider({ children }: { children: ReactNode }) {
     setPatient(patientData);
   };
 
+  const updatePatient = (patientData: Patient) => {
+    setPatient(patientData);
+  };
+
   const logoutPatient = () => {
     localStorage.removeItem('zenova-patient-token');
     setToken(null);
@@ -63,7 +73,7 @@ export function PatientAuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PatientAuthContext.Provider value={{ patient, token, loginPatient, logoutPatient, isLoading }}>
+    <PatientAuthContext.Provider value={{ patient, token, loginPatient, updatePatient, logoutPatient, isLoading }}>
       {children}
     </PatientAuthContext.Provider>
   );

@@ -102,7 +102,18 @@ export const loginPatient = async (req: Request, res: Response) => {
     return res.status(200).json({
       success: true,
       token,
-      patient: { id, name: patient.name, email: patient.email, phone: patient.phone, isAdmin }
+      patient: { 
+        id, 
+        name: patient.name, 
+        email: patient.email, 
+        phone: patient.phone, 
+        profilePic: patient.profilePic,
+        address: patient.address,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory,
+        isAdmin 
+      }
     });
   } catch (error) {
     console.error('Patient login error:', error);
@@ -121,12 +132,32 @@ export const getPatientMe = async (req: Request, res: Response) => {
     if (dbStatus.connected) {
       const patient = await PatientModel.findById(user.id).select('-passwordHash');
       if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
-      patientData = { id: patient._id, name: patient.name, email: patient.email, phone: patient.phone };
+      patientData = { 
+        id: patient._id, 
+        name: patient.name, 
+        email: patient.email, 
+        phone: patient.phone,
+        profilePic: patient.profilePic,
+        address: patient.address,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory
+      };
     } else {
       const db = getFallbackDb();
       const patient = db.patients?.find(p => p.id === user.id);
       if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
-      patientData = { id: patient.id, name: patient.name, email: patient.email, phone: patient.phone };
+      patientData = { 
+        id: patient.id, 
+        name: patient.name, 
+        email: patient.email, 
+        phone: patient.phone,
+        profilePic: patient.profilePic,
+        address: patient.address,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory
+      };
     }
 
     let isAdmin = false;
@@ -144,5 +175,67 @@ export const getPatientMe = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, patient: patientData });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error fetching profile' });
+  }
+};
+
+export const updatePatientProfile = async (req: Request, res: Response) => {
+  const user = (req as any).user;
+  const { name, phone, profilePic, address, dob, gender, medicalHistory } = req.body;
+  const dbStatus = getDbStatus();
+
+  try {
+    let updatedData: any = null;
+
+    if (dbStatus.connected) {
+      const patient = await PatientModel.findById(user.id);
+      if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
+
+      if (name) patient.name = name;
+      if (phone) patient.phone = phone;
+      if (profilePic !== undefined) patient.profilePic = profilePic;
+      if (address !== undefined) patient.address = address;
+      if (dob !== undefined) patient.dob = dob;
+      if (gender !== undefined) patient.gender = gender;
+      if (medicalHistory !== undefined) patient.medicalHistory = medicalHistory;
+
+      await patient.save();
+
+      updatedData = {
+        id: patient._id,
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone,
+        profilePic: patient.profilePic,
+        address: patient.address,
+        dob: patient.dob,
+        gender: patient.gender,
+        medicalHistory: patient.medicalHistory
+      };
+    } else {
+      const db = getFallbackDb();
+      const patientIndex = db.patients?.findIndex(p => p.id === user.id);
+      if (patientIndex === undefined || patientIndex === -1 || !db.patients) {
+        return res.status(404).json({ success: false, message: 'Patient not found' });
+      }
+
+      const patient = db.patients[patientIndex];
+      if (name) patient.name = name;
+      if (phone) patient.phone = phone;
+      if (profilePic !== undefined) patient.profilePic = profilePic;
+      if (address !== undefined) patient.address = address;
+      if (dob !== undefined) patient.dob = dob;
+      if (gender !== undefined) patient.gender = gender;
+      if (medicalHistory !== undefined) patient.medicalHistory = medicalHistory;
+
+      db.patients[patientIndex] = patient;
+      saveFallbackDb(db);
+
+      updatedData = { ...patient };
+    }
+
+    return res.status(200).json({ success: true, patient: updatedData });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ success: false, message: 'Server error updating profile' });
   }
 };

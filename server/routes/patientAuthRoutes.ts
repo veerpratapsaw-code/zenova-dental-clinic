@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerPatient, loginPatient, getPatientMe } from '../controllers/patientAuthController';
+import { registerPatient, loginPatient, getPatientMe, updatePatientProfile } from '../controllers/patientAuthController';
 import { requirePatientAuth } from '../middleware/patientAuthMiddleware';
 import { getFallbackDb, getDbStatus } from '../config/db';
 import { AppointmentModel } from '../models/Appointment';
@@ -9,6 +9,7 @@ const router = express.Router();
 router.post('/register', registerPatient);
 router.post('/login', loginPatient);
 router.get('/me', requirePatientAuth, getPatientMe);
+router.put('/profile', requirePatientAuth, updatePatientProfile);
 
 // Patient Dashboard: Get their own appointments
 router.get('/appointments', requirePatientAuth, async (req, res) => {

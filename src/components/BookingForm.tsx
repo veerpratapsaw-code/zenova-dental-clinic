@@ -389,39 +389,43 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
                 {activeTab === 'appointment' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {/* Phone field */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-slate-500 font-mono uppercase tracking-wide flex items-center gap-1">
-                        <Phone className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                        Contact Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        placeholder="e.g. +91 9608106681"
-                        className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
-                        required={activeTab === 'appointment' && formConfig.requirePhone}
-                      />
-                    </div>
+                    {(activeTab === 'contact' || formConfig.requirePhone) && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-500 font-mono uppercase tracking-wide flex items-center gap-1">
+                          <Phone className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                          Contact Phone
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="e.g. +91 9608106681"
+                          className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
+                          required={activeTab === 'appointment' && formConfig.requirePhone}
+                        />
+                      </div>
+                    )}
 
                     {/* Preferred Date */}
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-xs font-bold text-slate-500 font-mono uppercase tracking-wide flex items-center gap-1">
-                        <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
-                        Preferred Date
-                      </label>
-                      <input
-                        type="date"
-                        name="preferredDate"
-                        min={getMinDate()}
-                        max={getMaxDate()}
-                        value={formData.preferredDate}
-                        onChange={handleInputChange}
-                        className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
-                        required={activeTab === 'appointment' && formConfig.requireDate}
-                      />
-                    </div>
+                    {(activeTab === 'contact' || formConfig.requireDate) && (
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-bold text-slate-500 font-mono uppercase tracking-wide flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                          Preferred Date
+                        </label>
+                        <input
+                          type="date"
+                          name="preferredDate"
+                          min={getMinDate()}
+                          max={getMaxDate()}
+                          value={formData.preferredDate}
+                          onChange={handleInputChange}
+                          className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
+                          required={activeTab === 'appointment' && formConfig.requireDate}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
 

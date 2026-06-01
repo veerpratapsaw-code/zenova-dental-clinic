@@ -43,6 +43,11 @@ export interface FallbackDatabase {
     name: string;
     email: string;
     phone: string;
+    profilePic?: string;
+    address?: string;
+    dob?: string;
+    gender?: string;
+    medicalHistory?: string;
     createdAt: string;
   }>;
   blogs?: Array<{

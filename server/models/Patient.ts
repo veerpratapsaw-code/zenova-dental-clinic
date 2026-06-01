@@ -5,6 +5,11 @@ export interface IPatient extends Document {
   email: string;
   passwordHash: string;
   phone: string;
+  profilePic?: string;
+  address?: string;
+  dob?: string;
+  gender?: string;
+  medicalHistory?: string;
   createdAt: Date;
 }
 
@@ -13,6 +18,11 @@ const PatientSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   passwordHash: { type: String, required: true },
   phone: { type: String, required: true },
+  profilePic: { type: String },
+  address: { type: String },
+  dob: { type: String },
+  gender: { type: String },
+  medicalHistory: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
