@@ -19,29 +19,29 @@ export default function Testimonials() {
     {
       id: 'test-1',
       quote: "The advanced diagnostics scanned my dental structure in seconds. The custom Invisalign clear guides were delivered inside 3 days, and my realignment program finished 3 weeks ahead of estimate! Absolutely seamless futuristic clinical experience.",
-      author: 'Maya Patel',
+      author: 'Anjali Sharma',
       role: 'Creative Director, Omniverse Labs',
       rating: 5,
       treatmentRecieved: 'Invisalign Orthodontics',
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop'
+      avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=150&auto=format&fit=crop'
     },
     {
       id: 'test-2',
       quote: "I was extremely anxious about my root canal, but Dr. Mercer completed it under microscopic guidance completely pain-free! The ambient ceiling monitors and warm noise-cancelling headphones made me forget I was undergoing a surgical procedure.",
-      author: 'Arthur Pendelton',
+      author: 'Rahul Verma',
       role: 'Principal Developer, Apex Systems',
       rating: 5,
       treatmentRecieved: 'Microscopic Root Canal',
-      avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop'
+      avatarUrl: 'https://images.unsplash.com/photo-1531384441138-2736e62e0919?q=80&w=150&auto=format&fit=crop'
     },
     {
       id: 'test-3',
       quote: "My custom porcelain micro-veneers look exceptionally biological. They modeled the enamel shade dynamically to replicate the light-absorbing depth of natural teeth. Designing templates before bonding saved weeks of guesswork. Five Stars!",
-      author: 'Clarissa Sterling',
+      author: 'Priya Patel',
       role: 'Exhibition Architect, Museum of Tomorrow',
       rating: 5,
       treatmentRecieved: 'Bespoke Smile Makeover',
-      avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop'
+      avatarUrl: 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?q=80&w=150&auto=format&fit=crop'
     }
   ];
 

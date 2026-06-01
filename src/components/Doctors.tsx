@@ -10,37 +10,15 @@ export default function Doctors({ onDoctorConsult }: DoctorsProps) {
   
   const specialists: Doctor[] = [
     {
-      id: 'doc-vance',
-      name: 'Dr. Alexander Vance',
+      id: 'doc-arvind',
+      name: 'Dr. Arvind Sharma',
       role: 'Master Dental Implantologist',
       experience: '16 Years Practice',
-      imageURL: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&auto=format&fit=crop&facepad=2',
+      imageURL: 'https://ui-avatars.com/api/?name=%3F&background=E0E7FF&color=4F46E5&size=400',
       specialty: 'Oral Prosthetics & Biomimetic Restorations',
       education: 'DDS - Columbia University Dental Surgery',
-      bio: 'Alexander pioneered low-heat computer-guided drilling techniques to optimize biological bone merging during crown anchors.',
+      bio: 'Arvind pioneered low-heat computer-guided drilling techniques to optimize biological bone merging during crown anchors.',
       daysAvailable: ['Mon', 'Tue', 'Thu', 'Fri']
-    },
-    {
-      id: 'doc-mercer',
-      name: 'Dr. Evelyn Mercer',
-      role: 'Chief Cosmetic Smile Designer',
-      experience: '12 Years Practice',
-      imageURL: 'https://images.unsplash.com/photo-1594824813573-246434de83fb?q=80&w=400&auto=format&fit=crop&facepad=2',
-      specialty: 'Porcelain Micro-Veneers & Digital Smile Design',
-      education: 'DDS - Harvard School of Dental Medicine',
-      bio: 'Evelyn holds a masters in aesthetic science, specializing in geometrically aligning veneers and lengthening gums to model jaw flow.',
-      daysAvailable: ['Tue', 'Wed', 'Thu']
-    },
-    {
-      id: 'doc-thorne',
-      name: 'Dr. Rowan Thorne',
-      role: 'Certified Invisalign Designer',
-      experience: '9 Years Practice',
-      imageURL: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop&facepad=2',
-      specialty: '3D Polyurethane Orthodontics & Clear Aligners',
-      education: 'DMD - Penn Dental Medicine',
-      bio: 'Rowan designs SmartForce movement anchors to facilitate complex shifts safely in teenagers and adult professionals.',
-      daysAvailable: ['Mon', 'Wed', 'Fri']
     }
   ];
 
