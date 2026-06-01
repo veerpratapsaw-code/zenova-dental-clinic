@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Quote, ChevronLeft, ChevronRight, Star, Heart } from 'lucide-react';
+import { Quote, ChevronLeft, ChevronRight, Star, Heart, PenLine } from 'lucide-react';
+import LeaveReviewModal from './LeaveReviewModal';
 
 interface Testimonial {
   id: string;
@@ -9,15 +10,12 @@ interface Testimonial {
   role: string;
   rating: number;
   treatmentRecieved: string;
-  avatarUrl: string;
+  avatarUrl?: string;
 }
 
-export default function Testimonials() {
-  const [activeIdx, setActiveIdx] = useState(0);
-
-  const testimonials: Testimonial[] = [
-    {
-      id: 'test-1',
+const staticTestimonials: Testimonial[] = [
+  {
+    id: 'test-1',
       quote: "The advanced diagnostics scanned my dental structure in seconds. The custom Invisalign clear guides were delivered inside 3 days, and my realignment program finished 3 weeks ahead of estimate! Absolutely seamless futuristic clinical experience.",
       author: 'Anjali Sharma',
       role: 'Creative Director, Omniverse Labs',
@@ -43,17 +41,48 @@ export default function Testimonials() {
       treatmentRecieved: 'Bespoke Smile Makeover',
       avatarUrl: 'https://images.unsplash.com/photo-1589156229687-496a31ad1d1f?q=80&w=150&auto=format&fit=crop'
     }
-  ];
+];
+
+export default function Testimonials() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [dynamicTestimonials, setDynamicTestimonials] = useState<Testimonial[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchFeedbacks = async () => {
+      try {
+        const res = await fetch('/api/feedback');
+        const data = await res.json();
+        if (data.success && data.data.length > 0) {
+          const mapped = data.data.map((f: any) => ({
+            id: f.id || f._id,
+            quote: f.quote,
+            author: f.author,
+            role: f.role || 'Patient',
+            rating: f.rating,
+            treatmentRecieved: f.treatmentRecieved,
+            avatarUrl: f.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop'
+          }));
+          setDynamicTestimonials(mapped);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dynamic testimonials', error);
+      }
+    };
+    fetchFeedbacks();
+  }, []);
+
+  const allTestimonials = [...dynamicTestimonials, ...staticTestimonials];
 
   const handlePrev = () => {
-    setActiveIdx((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1));
+    setActiveIdx((prev) => (prev === 0 ? allTestimonials.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setActiveIdx((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1));
+    setActiveIdx((prev) => (prev === allTestimonials.length - 1 ? 0 : prev + 1));
   };
 
-  const current = testimonials[activeIdx];
+  const current = allTestimonials[activeIdx];
 
   return (
     <section id="testimonials" className="py-24 relative overflow-hidden bg-white/20 dark:bg-[#0a0a1a] transition-colors duration-500">
@@ -150,7 +179,7 @@ export default function Testimonials() {
 
             {/* dot controllers */}
             <div className="flex gap-2">
-              {testimonials.map((_, i) => (
+              {allTestimonials.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveIdx(i)}
@@ -172,9 +201,21 @@ export default function Testimonials() {
             </button>
           </div>
 
+          <div className="mt-12">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="group flex items-center gap-2 px-6 py-3 bg-white/50 hover:bg-white dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm hover:shadow-md transition-all text-sm font-bold text-slate-700 dark:text-slate-300 hover:text-purple-600 dark:hover:text-purple-400"
+            >
+              <PenLine className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              Write a Review
+            </button>
+          </div>
+
         </div>
 
       </div>
+
+      <LeaveReviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 }

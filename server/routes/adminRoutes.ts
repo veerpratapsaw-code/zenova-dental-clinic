@@ -366,4 +366,74 @@ router.delete('/blogs/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Get all feedbacks
+router.get('/feedbacks', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    let data;
+    if (mode === 'mongodb') {
+      const { FeedbackModel: Feedback } = await import('../models/Feedback');
+      const docs = await Feedback.find().sort({ createdAt: -1 });
+      data = docs.map((doc: any) => {
+        const obj = doc.toJSON();
+        obj.id = doc.id;
+        return obj;
+      });
+    } else {
+      const db = getFallbackDb();
+      data = db.feedbacks || [];
+    }
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error fetching feedbacks' });
+  }
+});
+
+// Toggle feedback approval
+router.put('/feedbacks/:id/approve', requireAuth, async (req, res) => {
+  try {
+    const { isApproved } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { FeedbackModel: Feedback } = await import('../models/Feedback');
+      const feedback = await Feedback.findByIdAndUpdate(req.params.id, { isApproved }, { new: true });
+      if (!feedback) return res.status(404).json({ success: false, message: 'Not found' });
+      res.status(200).json({ success: true, data: feedback });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.feedbacks?.findIndex(f => f.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.feedbacks) {
+        db.feedbacks[idx].isApproved = isApproved;
+        saveFallbackDb(db);
+        res.status(200).json({ success: true, data: db.feedbacks[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update feedback' });
+  }
+});
+
+// Delete feedback
+router.delete('/feedbacks/:id', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { FeedbackModel: Feedback } = await import('../models/Feedback');
+      await Feedback.findByIdAndDelete(req.params.id);
+      res.status(200).json({ success: true });
+    } else {
+      const db = getFallbackDb();
+      if (db.feedbacks) {
+        db.feedbacks = db.feedbacks.filter(f => f.id !== req.params.id);
+        saveFallbackDb(db);
+      }
+      res.status(200).json({ success: true });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete feedback' });
+  }
+});
+
 export default router;

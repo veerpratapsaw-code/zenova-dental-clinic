@@ -16,17 +16,19 @@ import {
   Plus,
   Globe,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Star
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
 export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs' | 'feedbacks'>('appointments');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New Admin form state
@@ -92,6 +94,12 @@ export default function AdminDashboard() {
         const res = await fetch('/api/blogs');
         const json = await res.json();
         if (json.success) setBlogs(json.data);
+      } else if (activeTab === 'feedbacks') {
+        const res = await fetch('/api/admin/feedbacks', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const json = await res.json();
+        if (json.success) setFeedbacks(json.data);
       }
     } catch (error) {
       console.error('Failed to fetch data');
@@ -258,6 +266,38 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleToggleFeedbackApproval = async (id: string, isApproved: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/feedbacks/${id}/approve`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ isApproved })
+      });
+      if (res.ok) {
+        setFeedbacks(prev => prev.map(f => f.id === id ? { ...f, isApproved } : f));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteFeedback = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/feedbacks/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setFeedbacks(prev => prev.filter(f => f.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleDeleteAppointment = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
@@ -400,6 +440,18 @@ export default function AdminDashboard() {
           >
             <FileText className="w-4 h-4" />
             Manage Blogs
+          </button>
+
+          <button
+            onClick={() => setActiveTab('feedbacks')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'feedbacks'
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <Star className="w-4 h-4" />
+            Manage Feedbacks
           </button>
         </nav>
 
@@ -743,6 +795,51 @@ export default function AdminDashboard() {
                     </button>
                   </form>
                 </div>
+              </div>
+            )}
+            
+            {/* Feedbacks View */}
+            {activeTab === 'feedbacks' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {feedbacks.length === 0 && <p className="text-slate-500 col-span-full">No feedbacks submitted yet.</p>}
+                {feedbacks.map((fb) => (
+                  <div key={fb.id} className="bg-white dark:bg-[#0f0f23]/80 p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm flex flex-col">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                          {fb.author}
+                          <span className="flex items-center gap-0.5 px-1.5 py-0.5 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded text-xs">
+                            <Star className="w-3 h-3 fill-current" /> {fb.rating}
+                          </span>
+                        </h4>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{fb.treatmentRecieved}</div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-[10px] font-mono text-slate-400">{new Date(fb.createdAt).toLocaleDateString()}</span>
+                        <button onClick={() => handleDeleteFeedback(fb.id)} className="p-1 text-slate-400 hover:text-rose-500 transition-colors" title="Delete Feedback">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/5 flex-1 mb-4">
+                      <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{fb.quote}"</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleFeedbackApproval(fb.id, !fb.isApproved)}
+                      className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 ${
+                        fb.isApproved 
+                          ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:hover:bg-emerald-500/20' 
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10'
+                      }`}
+                    >
+                      {fb.isApproved ? (
+                        <><CheckCircle2 className="w-4 h-4" /> Public on Website</>
+                      ) : (
+                        <>Approve for Website</>
+                      )}
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
             

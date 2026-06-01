@@ -19,6 +19,7 @@ import adminRoutes from './server/routes/adminRoutes';
 import chatRoutes from './server/routes/chatRoutes';
 import patientAuthRoutes from './server/routes/patientAuthRoutes';
 import blogRoutes from './server/routes/blogRoutes';
+import feedbackRoutes from './server/routes/feedbackRoutes';
 
 // Resolve directory names for ES module scope (Removed due to CJS build crash, unused)
 // const __filename = fileURLToPath(import.meta.url);
@@ -62,6 +63,7 @@ app.use('/api', appointmentRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', chatRoutes);
 app.use('/api/blogs', blogRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Auth and Admin Dashboard routes
 app.use('/api/auth', authRoutes);
