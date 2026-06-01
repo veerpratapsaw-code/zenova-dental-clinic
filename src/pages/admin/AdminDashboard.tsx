@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -736,8 +734,8 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Blog Content</label>
-                      <div className="bg-white dark:bg-white text-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10">
-                        <ReactQuill theme="snow" value={newBlogContent} onChange={setNewBlogContent} className="h-64 mb-12" />
+                      <div className="bg-slate-50 dark:bg-black/20 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10">
+                        <textarea required value={newBlogContent} onChange={e => setNewBlogContent(e.target.value)} className="w-full h-64 p-4 bg-transparent focus:outline-none focus:border-cyan-500 dark:text-white text-sm resize-none" placeholder="Write your full blog post content here... (HTML tags are supported for formatting)" />
                       </div>
                     </div>
                     <button disabled={blogActionLoading || !newBlogTitle || !newBlogContent} type="submit" className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">

@@ -28,7 +28,6 @@
     "nodemailer": "^8.0.9",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
-    "react-quill": "^2.0.0",
     "react-router-dom": "^7.16.0",
     "twilio": "^6.0.2",
     "vite": "^6.2.3"
