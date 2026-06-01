@@ -70,100 +70,127 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/patient', patientAuthRoutes);
 
-// Support Services Metadata API (retained to feed clinical list components)
-app.get('/api/services', (req, res) => {
-  const services = [
-    {
-      id: 'implants',
-      title: 'Dental Implants',
-      description: 'Biomimetic titanium-grade restorations engineered to match biological bone structures for look, durability, and function.',
-      iconName: 'Anchor',
-      details: [
-        'Pure surgical-grade titanium structures',
-        'Advanced computer-guided guided placements',
-        'Custom ceramic crowns with natural optical dispersion',
-        'High bone-merging stability rate (99.2%)'
-      ],
-      duration: '60 - 90 mins (Per Implant)',
-      avgCost: '$1,800 - $3,500'
-    },
-    {
-      id: 'root-canal',
-      title: 'Root Canal',
-      description: 'Microscopic and pain-free endodontics designed to purge infection, secure biological structures, and restore complete health.',
-      iconName: 'Stethoscope',
-      details: [
-        'Advanced high-magnification surgical micro-lenses',
-        'Ultra-precise sonic irrigation disinfection',
-        'Silent thermal thermoplastic fillings',
-        'Virtually zero discomfort with state-of-the-art anesthesia'
-      ],
-      duration: '45 - 60 mins',
-      avgCost: '$750 - $1,200'
-    },
-    {
-      id: 'whitening',
-      title: 'Teeth Whitening',
-      description: 'Futuristic smart-laser light treatment designed to gently lift active stains without creating enamel, tissue, or nerve sensitivity.',
-      iconName: 'Sparkles',
-      details: [
-        'Therapeutic laser light accelerated formula',
-        'Personalized protective gingival barriers',
-        'Gains up to 8-10 natural shades in single session',
-        'Reinforced with calcium desensitizing minerals'
-      ],
-      duration: '45 mins',
-      avgCost: '$299 - $499'
-    },
-    {
-      id: 'makeover',
-      title: 'Smile Makeover',
-      description: 'A completely customized cosmetic design tailored geometrically to your facial contours, lips, and natural speech flow.',
-      iconName: 'Smile',
-      details: [
-        'Complete digital smile design (DSD) modeling simulation',
-        'Handcrafted porcelain thin-core veneers',
-        'Bespoke laser crown lengthening for high-lip lines',
-        'Pre-visualized 3D mockup trials before physical bonding'
-      ],
-      duration: 'Multiple sessions',
-      avgCost: 'Custom Plan'
-    },
-    {
-      id: 'invisalign',
-      title: 'Invisalign Orthodontics',
-      description: 'SmartTrack polyurethane orthodontic aligners that gently slide teeth into alignment without noticeable metal components.',
-      iconName: 'Sparkle',
-      details: [
-        'Iterative digital 3D scans - no messy putty',
-        'Ultra thin, crystal clear, food-friendly removable wear',
-        'Bi-weekly gradual structural guidance cycles',
-        'Integrated SmartForce attachments for difficult shifts'
-      ],
-      duration: 'Visit every 4-6 weeks',
-      avgCost: '$3,200 - $5,800'
-    },
-    {
-      id: 'cosmetic',
-      title: 'Cosmetic Dentistry',
-      description: 'Expert ceramic bonding, custom micro-contouring, and aesthetic enamel scuplting designed to perfect small visual discrepancies.',
-      iconName: 'Gem',
-      details: [
-        'Minimally invasive composite cosmetic veneers',
-        'Painless laser-guided structural tissue contouring',
-        'Micro-abrasion treatment for enamel color spots',
-        'Immediate same-day physical smile modifications'
-      ],
-      duration: '30 - 60 mins',
-      avgCost: '$150 - $600'
-    }
-  ];
+import { getDbStatus, getFallbackDb } from './server/config/db';
 
-  res.status(200).json({
-    success: true,
-    message: 'Dental service structures listed successfully',
-    data: services
-  });
+app.get('/api/settings', async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    let data;
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('./server/models/Settings');
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create({ priorityPrice: 1000, emergencyPrice: 3500 });
+      }
+      data = settings.toJSON();
+      data.id = settings.id;
+    } else {
+      const db = getFallbackDb();
+      data = db.settings || { priorityPrice: 1000, emergencyPrice: 3500 };
+    }
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error fetching settings' });
+  }
+});
+
+app.get('/api/services', async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    let data;
+    if (mode === 'mongodb') {
+      const { ServiceModel: Service } = await import('./server/models/Service');
+      const docs = await Service.find().sort({ order: 1 });
+      if (docs.length === 0) {
+        // Seed default services if empty
+        const initialServices = [
+          {
+            title: 'Dental Implants',
+            description: 'Biomimetic titanium-grade restorations engineered to match biological bone structures for look, durability, and function.',
+            iconName: 'Anchor',
+            details: ['Pure surgical-grade titanium structures', 'Advanced computer-guided placements', 'Custom ceramic crowns with natural optical dispersion', 'High bone-merging stability rate (99.2%)'],
+            duration: '60 - 90 mins (Per Implant)',
+            avgCost: '$1,800 - $3,500',
+            order: 1
+          },
+          {
+            title: 'Root Canal',
+            description: 'Microscopic and pain-free endodontics designed to purge infection, secure biological structures, and restore complete health.',
+            iconName: 'Stethoscope',
+            details: ['Advanced high-magnification surgical micro-lenses', 'Ultra-precise sonic irrigation disinfection', 'Silent thermal thermoplastic fillings', 'Virtually zero discomfort with state-of-the-art anesthesia'],
+            duration: '45 - 60 mins',
+            avgCost: '$750 - $1,200',
+            order: 2
+          },
+          {
+            title: 'Teeth Whitening',
+            description: 'Futuristic smart-laser light treatment designed to gently lift active stains without creating enamel, tissue, or nerve sensitivity.',
+            iconName: 'Sparkles',
+            details: ['Therapeutic laser light accelerated formula', 'Personalized protective gingival barriers', 'Gains up to 8-10 natural shades in single session', 'Reinforced with calcium desensitizing minerals'],
+            duration: '45 mins',
+            avgCost: '$299 - $499',
+            order: 3
+          },
+          {
+            title: 'Smile Makeover',
+            description: 'A completely customized cosmetic design tailored geometrically to your facial contours, lips, and natural speech flow.',
+            iconName: 'Smile',
+            details: ['Complete digital smile design (DSD) modeling simulation', 'Handcrafted porcelain thin-core veneers', 'Bespoke laser crown lengthening for high-lip lines', 'Pre-visualized 3D mockup trials before physical bonding'],
+            duration: 'Multiple sessions',
+            avgCost: 'Custom Plan',
+            order: 4
+          },
+          {
+            title: 'Invisalign Orthodontics',
+            description: 'SmartTrack polyurethane orthodontic aligners that gently slide teeth into alignment without noticeable metal components.',
+            iconName: 'Sparkle',
+            details: ['Iterative digital 3D scans - no messy putty', 'Ultra thin, crystal clear, food-friendly removable wear', 'Bi-weekly gradual structural guidance cycles', 'Integrated SmartForce attachments for difficult shifts'],
+            duration: 'Visit every 4-6 weeks',
+            avgCost: '$3,200 - $5,800',
+            order: 5
+          },
+          {
+            title: 'Cosmetic Dentistry',
+            description: 'Expert ceramic bonding, custom micro-contouring, and aesthetic enamel scuplting designed to perfect small visual discrepancies.',
+            iconName: 'Gem',
+            details: ['Minimally invasive composite cosmetic veneers', 'Painless laser-guided structural tissue contouring', 'Micro-abrasion treatment for enamel color spots', 'Immediate same-day physical smile modifications'],
+            duration: '30 - 60 mins',
+            avgCost: '$150 - $600',
+            order: 6
+          }
+        ];
+        await Service.insertMany(initialServices);
+        const seededDocs = await Service.find().sort({ order: 1 });
+        data = seededDocs.map((doc: any) => { const obj = doc.toJSON(); obj.id = doc.id; return obj; });
+      } else {
+        data = docs.map((doc: any) => { const obj = doc.toJSON(); obj.id = doc.id; return obj; });
+      }
+    } else {
+      const db = getFallbackDb();
+      if (!db.services || db.services.length === 0) {
+        // Initialize default static services in fallback mode
+        db.services = [
+          { id: '1', title: 'Dental Implants', description: 'Biomimetic titanium-grade restorations engineered to match biological bone structures for look, durability, and function.', iconName: 'Anchor', details: ['Pure surgical-grade titanium structures', 'Advanced computer-guided placements', 'Custom ceramic crowns with natural optical dispersion', 'High bone-merging stability rate (99.2%)'], duration: '60 - 90 mins (Per Implant)', avgCost: '$1,800 - $3,500', order: 1 },
+          { id: '2', title: 'Root Canal', description: 'Microscopic and pain-free endodontics designed to purge infection, secure biological structures, and restore complete health.', iconName: 'Stethoscope', details: ['Advanced high-magnification surgical micro-lenses', 'Ultra-precise sonic irrigation disinfection', 'Silent thermal thermoplastic fillings', 'Virtually zero discomfort with state-of-the-art anesthesia'], duration: '45 - 60 mins', avgCost: '$750 - $1,200', order: 2 },
+          { id: '3', title: 'Teeth Whitening', description: 'Futuristic smart-laser light treatment designed to gently lift active stains without creating enamel, tissue, or nerve sensitivity.', iconName: 'Sparkles', details: ['Therapeutic laser light accelerated formula', 'Personalized protective gingival barriers', 'Gains up to 8-10 natural shades in single session', 'Reinforced with calcium desensitizing minerals'], duration: '45 mins', avgCost: '$299 - $499', order: 3 },
+          { id: '4', title: 'Smile Makeover', description: 'A completely customized cosmetic design tailored geometrically to your facial contours, lips, and natural speech flow.', iconName: 'Smile', details: ['Complete digital smile design (DSD) modeling simulation', 'Handcrafted porcelain thin-core veneers', 'Bespoke laser crown lengthening for high-lip lines', 'Pre-visualized 3D mockup trials before physical bonding'], duration: 'Multiple sessions', avgCost: 'Custom Plan', order: 4 },
+          { id: '5', title: 'Invisalign Orthodontics', description: 'SmartTrack polyurethane orthodontic aligners that gently slide teeth into alignment without noticeable metal components.', iconName: 'Sparkle', details: ['Iterative digital 3D scans - no messy putty', 'Ultra thin, crystal clear, food-friendly removable wear', 'Bi-weekly gradual structural guidance cycles', 'Integrated SmartForce attachments for difficult shifts'], duration: 'Visit every 4-6 weeks', avgCost: '$3,200 - $5,800', order: 5 },
+          { id: '6', title: 'Cosmetic Dentistry', description: 'Expert ceramic bonding, custom micro-contouring, and aesthetic enamel scuplting designed to perfect small visual discrepancies.', iconName: 'Gem', details: ['Minimally invasive composite cosmetic veneers', 'Painless laser-guided structural tissue contouring', 'Micro-abrasion treatment for enamel color spots', 'Immediate same-day physical smile modifications'], duration: '30 - 60 mins', avgCost: '$150 - $600', order: 6 }
+        ];
+        const { saveFallbackDb } = await import('./server/config/db');
+        saveFallbackDb(db);
+      }
+      data = db.services;
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Dental service structures listed successfully',
+      data: data
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error fetching services' });
+  }
 });
 
 // Health Probe Check endpoint for external cloud diagnostics

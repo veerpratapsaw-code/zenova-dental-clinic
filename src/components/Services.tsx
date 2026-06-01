@@ -51,6 +51,7 @@ function TiltServiceCard({
         delay: index * 0.08,
         ease: [0.16, 1, 0.3, 1],
       }}
+      className="h-full"
     >
       <div
         ref={ref}
@@ -230,16 +231,36 @@ export default function Services({ onBookSpecialty }: ServicesProps) {
             <span className="text-slate-500 font-mono text-xs">Querying database structures...</span>
           </div>
         ) : (
-          /* Grid of 3D Tilt Glass Cards */
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => (
-              <TiltServiceCard
-                key={service.id}
-                service={service}
-                onSelect={setSelectedService}
-                index={index}
-              />
-            ))}
+          /* Grid of 3D Tilt Glass Cards (Bento Box Aesthetic) */
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-6 auto-rows-fr">
+            {services.map((service, index) => {
+              // Dynamic Premium Bento Box logic
+              let spanClass = "col-span-1 md:col-span-3 lg:col-span-4"; 
+              
+              // Create an elegant, masonry-like spanning pattern
+              const patternIndex = index % 7;
+              if (patternIndex === 0) {
+                spanClass = "col-span-1 md:col-span-6 lg:col-span-8"; // Large feature block
+              } else if (patternIndex === 1) {
+                spanClass = "col-span-1 md:col-span-3 lg:col-span-4"; // Side block
+              } else if (patternIndex >= 2 && patternIndex <= 4) {
+                spanClass = "col-span-1 md:col-span-2 lg:col-span-4"; // 3 equal blocks row
+              } else if (patternIndex === 5) {
+                spanClass = "col-span-1 md:col-span-3 lg:col-span-4"; // Side block
+              } else if (patternIndex === 6) {
+                spanClass = "col-span-1 md:col-span-6 lg:col-span-8"; // Large feature block right
+              }
+
+              return (
+                <div key={service.id} className={spanClass}>
+                  <TiltServiceCard
+                    service={service}
+                    onSelect={setSelectedService}
+                    index={index}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 

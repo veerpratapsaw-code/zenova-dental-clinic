@@ -436,4 +436,80 @@ router.delete('/feedbacks/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Add a Service
+router.post('/services', requireAuth, async (req, res) => {
+  try {
+    const { title, description, iconName, details, duration, avgCost, order } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { ServiceModel: Service } = await import('../models/Service');
+      const service = await Service.create({ title, description, iconName, details, duration, avgCost, order });
+      const data = service.toJSON();
+      data.id = service.id;
+      res.status(201).json({ success: true, data });
+    } else {
+      const db = getFallbackDb();
+      if (!db.services) db.services = [];
+      const newService = { id: Date.now().toString(), title, description, iconName, details, duration, avgCost, order };
+      db.services.push(newService);
+      saveFallbackDb(db);
+      res.status(201).json({ success: true, data: newService });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to create service' });
+  }
+});
+
+// Delete a Service
+router.delete('/services/:id', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { ServiceModel: Service } = await import('../models/Service');
+      await Service.findByIdAndDelete(req.params.id);
+      res.status(200).json({ success: true });
+    } else {
+      const db = getFallbackDb();
+      if (db.services) {
+        db.services = db.services.filter(s => s.id !== req.params.id);
+        saveFallbackDb(db);
+      }
+      res.status(200).json({ success: true });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete service' });
+  }
+});
+
+// Update Settings
+router.put('/settings', requireAuth, async (req, res) => {
+  try {
+    const { priorityPrice, emergencyPrice } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('../models/Settings');
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create({ priorityPrice, emergencyPrice });
+      } else {
+        settings.priorityPrice = priorityPrice;
+        settings.emergencyPrice = emergencyPrice;
+        await settings.save();
+      }
+      const data = settings.toJSON();
+      data.id = settings.id;
+      res.status(200).json({ success: true, data });
+    } else {
+      const db = getFallbackDb();
+      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500 };
+      db.settings.priorityPrice = priorityPrice;
+      db.settings.emergencyPrice = emergencyPrice;
+      saveFallbackDb(db);
+      res.status(200).json({ success: true, data: db.settings });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update settings' });
+  }
+});
+
 export default router;

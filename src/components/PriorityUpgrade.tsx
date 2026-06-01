@@ -11,6 +11,7 @@ interface PriorityUpgradeProps {
 
 export default function PriorityUpgrade({ selectedTier, onSelectTier }: PriorityUpgradeProps) {
   const [queueStatus, setQueueStatus] = useState({ standard: 0, priority: 0 });
+  const [settings, setSettings] = useState({ priorityPrice: 1000, emergencyPrice: 3500 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +23,15 @@ export default function PriorityUpgrade({ selectedTier, onSelectTier }: Priority
             standard: data.data.standardCount,
             priority: data.data.priorityCount
           });
+        }
+      })
+      .catch(console.error);
+
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setSettings(data.data);
         }
       })
       .catch(console.error)
@@ -88,7 +98,7 @@ export default function PriorityUpgrade({ selectedTier, onSelectTier }: Priority
           </div>
           <Zap className={`w-8 h-8 mb-4 ${selectedTier === 'priority' ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : 'text-purple-500/70'}`} />
           <h4 className="text-lg font-bold text-white mb-1">Priority Skip</h4>
-          <p className="text-2xl font-light text-purple-300 mb-2">+₹1000</p>
+          <p className="text-2xl font-light text-purple-300 mb-2">+₹{settings.priorityPrice}</p>
           <div className="h-[1px] w-full bg-white/10 mb-4" />
           <ul className="space-y-2 text-sm text-slate-400">
             <li className="text-purple-300 font-medium">• Skip standard queue</li>
@@ -115,7 +125,7 @@ export default function PriorityUpgrade({ selectedTier, onSelectTier }: Priority
           )}
           <AlertTriangle className={`w-8 h-8 mb-4 ${selectedTier === 'emergency' ? 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]' : 'text-red-500/60'}`} />
           <h4 className="text-lg font-bold text-white mb-1">Emergency</h4>
-          <p className="text-2xl font-light text-red-300 mb-2">+₹3500</p>
+          <p className="text-2xl font-light text-red-300 mb-2">+₹{settings.emergencyPrice}</p>
           <div className="h-[1px] w-full bg-white/10 mb-4" />
           <ul className="space-y-2 text-sm text-slate-400">
             <li className="text-red-300 font-medium">• Immediate Attention</li>

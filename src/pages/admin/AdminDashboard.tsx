@@ -17,18 +17,22 @@ import {
   Globe,
   FileText,
   Image as ImageIcon,
-  Star
+  Star,
+  Settings as SettingsIcon,
+  ClipboardList
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
 export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs' | 'feedbacks'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs' | 'feedbacks' | 'services' | 'settings'>('appointments');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
+  const [settingsData, setSettingsData] = useState({ priorityPrice: 1000, emergencyPrice: 3500 });
   const [loading, setLoading] = useState(true);
 
   // New Admin form state
@@ -44,6 +48,20 @@ export default function AdminDashboard() {
   const [newBlogContent, setNewBlogContent] = useState('');
   const [newBlogImage, setNewBlogImage] = useState<string>('');
   const [blogActionLoading, setBlogActionLoading] = useState(false);
+
+  // New Service form state
+  const [newServiceTitle, setNewServiceTitle] = useState('');
+  const [newServiceDesc, setNewServiceDesc] = useState('');
+  const [newServiceIcon, setNewServiceIcon] = useState('Stethoscope');
+  const [newServiceDetails, setNewServiceDetails] = useState('');
+  const [newServiceDuration, setNewServiceDuration] = useState('');
+  const [newServiceCost, setNewServiceCost] = useState('');
+  const [serviceActionLoading, setServiceActionLoading] = useState(false);
+
+  // Settings form state
+  const [priorityPriceInput, setPriorityPriceInput] = useState('');
+  const [emergencyPriceInput, setEmergencyPriceInput] = useState('');
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -100,6 +118,18 @@ export default function AdminDashboard() {
         });
         const json = await res.json();
         if (json.success) setFeedbacks(json.data);
+      } else if (activeTab === 'services') {
+        const res = await fetch('/api/services');
+        const json = await res.json();
+        if (json.success) setServices(json.data);
+      } else if (activeTab === 'settings') {
+        const res = await fetch('/api/settings');
+        const json = await res.json();
+        if (json.success) {
+          setSettingsData(json.data);
+          setPriorityPriceInput(json.data.priorityPrice.toString());
+          setEmergencyPriceInput(json.data.emergencyPrice.toString());
+        }
       }
     } catch (error) {
       console.error('Failed to fetch data');
@@ -298,6 +328,83 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCreateService = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setServiceActionLoading(true);
+    try {
+      const payload = {
+        title: newServiceTitle,
+        description: newServiceDesc,
+        iconName: newServiceIcon,
+        details: newServiceDetails.split(',').map(s => s.trim()),
+        duration: newServiceDuration,
+        avgCost: newServiceCost,
+        order: services.length + 1
+      };
+
+      const res = await fetch('/api/admin/services', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewServiceTitle('');
+        setNewServiceDesc('');
+        setNewServiceIcon('Stethoscope');
+        setNewServiceDetails('');
+        setNewServiceDuration('');
+        setNewServiceCost('');
+        fetchData(); // refresh list
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setServiceActionLoading(false);
+    }
+  };
+
+  const handleDeleteService = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/services/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setServices(prev => prev.filter(s => s.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ 
+          priorityPrice: Number(priorityPriceInput), 
+          emergencyPrice: Number(emergencyPriceInput) 
+        })
+      });
+      if (res.ok) {
+        alert('Settings updated successfully!');
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
   const handleDeleteAppointment = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
@@ -453,6 +560,30 @@ export default function AdminDashboard() {
             <Star className="w-4 h-4" />
             Manage Feedbacks
           </button>
+
+          <button
+            onClick={() => setActiveTab('services')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'services'
+                ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <ClipboardList className="w-4 h-4" />
+            Manage Services
+          </button>
+
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'settings'
+                ? 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-white'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <SettingsIcon className="w-4 h-4" />
+            Settings
+          </button>
         </nav>
 
         <div className="p-4 border-t border-slate-200 dark:border-white/10 space-y-2">
@@ -515,7 +646,13 @@ export default function AdminDashboard() {
                         <tr key={apt.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
                           <td className="p-4 pl-6">
                             <div className="font-bold text-slate-900 dark:text-white">{apt.name}</div>
-                            <div className="text-[10px] font-mono text-slate-400">ID: {apt.id.split('-')[1] || apt.id}</div>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <span className="text-[10px] font-mono text-slate-400">ID: {apt.id.split('-')[1] || apt.id}</span>
+                              <span className="flex items-center gap-1 text-[10px] text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                <Clock className="w-3 h-3" />
+                                {new Date(apt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
                             {apt.priorityLevel === 'emergency' && (
                               <div className="mt-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 text-[9px] font-black uppercase tracking-widest border border-red-200 dark:border-red-500/20">Emergency</span></div>
                             )}
@@ -840,6 +977,126 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 ))}
+              </div>
+            )}
+            
+            {/* Manage Services View */}
+            {activeTab === 'services' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Services List */}
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden h-fit">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Active Services</h3>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
+                    {services.length === 0 && <p className="p-6 text-slate-500 text-sm">No services configured.</p>}
+                    {services.map(service => (
+                      <div key={service.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">{service.title}</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">{service.description}</p>
+                          <div className="flex items-center gap-4 text-[10px] font-mono text-slate-500 dark:text-slate-400 mb-2">
+                            <span>Cost: {service.avgCost}</span>
+                            <span>Time: {service.duration}</span>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-500/20">
+                              Icon: {service.iconName}
+                            </span>
+                            <button onClick={() => handleDeleteService(service.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Create Service Form */}
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add New Service</h3>
+                  <form onSubmit={handleCreateService} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Service Title</label>
+                      <input type="text" required value={newServiceTitle} onChange={e => setNewServiceTitle(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" placeholder="e.g., Dental Implants" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Description</label>
+                      <textarea required value={newServiceDesc} onChange={e => setNewServiceDesc(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm resize-none" placeholder="Short marketing description..." />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Lucide Icon Name</label>
+                        <input type="text" required value={newServiceIcon} onChange={e => setNewServiceIcon(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" placeholder="e.g., Anchor, Smile, Gem" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Average Cost</label>
+                        <input type="text" required value={newServiceCost} onChange={e => setNewServiceCost(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" placeholder="e.g., $150 - $600" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Duration</label>
+                      <input type="text" required value={newServiceDuration} onChange={e => setNewServiceDuration(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" placeholder="e.g., 45-60 mins" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Bullet Details (Comma separated)</label>
+                      <textarea required value={newServiceDetails} onChange={e => setNewServiceDetails(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm resize-none" placeholder="Detail 1, Detail 2, Detail 3..." />
+                    </div>
+                    <button disabled={serviceActionLoading || !newServiceTitle} type="submit" className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                      {serviceActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Add Service</>}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Settings View */}
+            {activeTab === 'settings' && (
+              <div className="max-w-2xl mx-auto">
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center gap-3">
+                    <SettingsIcon className="w-5 h-5 text-slate-700 dark:text-white" />
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Global Pricing Configuration</h3>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-4">
+                      <h4 className="text-sm font-bold text-purple-700 dark:text-purple-400 mb-1">Priority Skip Fee</h4>
+                      <p className="text-xs text-purple-600/70 dark:text-purple-400/70 mb-3">Amount charged to patients bypassing the standard queue.</p>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                        <input 
+                          type="number" 
+                          value={priorityPriceInput} 
+                          onChange={(e) => setPriorityPriceInput(e.target.value)}
+                          className="w-full pl-8 pr-4 py-3 bg-white dark:bg-black/20 border border-purple-200 dark:border-purple-500/30 rounded-lg focus:outline-none focus:border-purple-500 font-mono text-slate-900 dark:text-white text-lg font-bold" 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-4">
+                      <h4 className="text-sm font-bold text-red-700 dark:text-red-400 mb-1">Emergency Fee</h4>
+                      <p className="text-xs text-red-600/70 dark:text-red-400/70 mb-3">Amount charged for immediate, bypassing walk-in attention.</p>
+                      <div className="relative">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
+                        <input 
+                          type="number" 
+                          value={emergencyPriceInput} 
+                          onChange={(e) => setEmergencyPriceInput(e.target.value)}
+                          className="w-full pl-8 pr-4 py-3 bg-white dark:bg-black/20 border border-red-200 dark:border-red-500/30 rounded-lg focus:outline-none focus:border-red-500 font-mono text-slate-900 dark:text-white text-lg font-bold" 
+                        />
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={handleUpdateSettings}
+                      disabled={settingsLoading}
+                      className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                    >
+                      {settingsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Pricing Configuration'}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
             
