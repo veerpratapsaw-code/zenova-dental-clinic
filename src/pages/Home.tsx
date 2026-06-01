@@ -7,6 +7,7 @@ import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Services from '../components/Services';
 import Gallery from '../components/Gallery';
+import Transformation from '../components/Transformation';
 import Doctors from '../components/Doctors';
 import Testimonials from '../components/Testimonials';
 import BookingForm from '../components/BookingForm';
@@ -82,6 +83,8 @@ export default function Home() {
         <Gallery />
       </motion.div>
 
+      {/* 5. Interactive Before/After Transformation Slider */}
+      <Transformation />
 
       {/* 6. Medical Staff Board wrapped in Cinematic Viewport transitions */}
       <motion.div
