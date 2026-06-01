@@ -3,6 +3,7 @@ import { Menu, X, Sparkles, Calendar, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../context/ThemeContext';
 import { usePatientAuth } from '../context/PatientAuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 
 interface NavbarProps {
@@ -15,6 +16,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
   const [activeSection, setActiveSection] = useState('home');
   const { theme, toggleTheme, isDark } = useTheme();
   const { patient, isLoading } = usePatientAuth();
+  const { user: adminUser } = useAuth();
 
   const desktopMenuItems = [
     { label: 'Home', href: '#home' },
@@ -168,6 +170,16 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               </Link>
             )}
 
+            {/* Admin Portal Link */}
+            {adminUser && (
+              <Link
+                to="/admin/dashboard"
+                className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-all border border-purple-200 dark:border-purple-500/30 ml-2"
+              >
+                Admin
+              </Link>
+            )}
+
             {/* Booking Button */}
             <button
               onClick={onBookClick}
@@ -245,6 +257,15 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               >
                 {patient ? 'Patient Portal' : 'Patient Login'}
               </Link>
+              {adminUser && (
+                <Link
+                  to="/admin/dashboard"
+                  onClick={() => setIsOpen(false)}
+                  className="block px-4 py-3 rounded-xl text-base font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20"
+                >
+                  Admin Dashboard
+                </Link>
+              )}
               <button
                 onClick={() => {
                   setIsOpen(false);

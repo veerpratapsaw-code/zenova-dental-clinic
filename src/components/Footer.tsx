@@ -142,21 +142,21 @@ export default function Footer() {
             &copy; {currentYear} For Your Dentist Studio. All Rights Reserved.
           </p>
 
-          {/* Om Ashutosh glowing credits in display styling */}
+          {/* Veer Pratap Saw glowing credits in display styling */}
           <div className="flex flex-col items-center md:items-end gap-1 select-none">
             <div className="text-xs font-mono font-semibold tracking-wide text-slate-500">
               Concept, layout & systems engineering
             </div>
             
             <a 
-              href="https://github.com/omashutosh" 
+              href="https://github.com/veerpratapsaw-code" 
               target="_blank" 
               rel="noreferrer" 
               className="text-sm font-black font-display tracking-tight text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 uppercase group cursor-pointer"
             >
               Website Designed & Developed by 
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-blue-300 font-extrabold drop-shadow-[0_0_8px_rgba(139,92,246,0.3)] transition-all animate-pulse">
-                Om Ashutosh
+                Veer Pratap Saw
               </span>
             </a>
           </div>
