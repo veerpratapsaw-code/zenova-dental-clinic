@@ -7,7 +7,7 @@ import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { fileURLToPath } from 'url';
+// import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 
 // Internal backend imports
@@ -19,9 +19,9 @@ import adminRoutes from './server/routes/adminRoutes';
 import chatRoutes from './server/routes/chatRoutes';
 import patientAuthRoutes from './server/routes/patientAuthRoutes';
 
-// Resolve directory names for ES module scope
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Resolve directory names for ES module scope (Removed due to CJS build crash, unused)
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = 3000;
