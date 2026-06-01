@@ -90,7 +90,6 @@ export default function AIChatbot() {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 shadow-[0_0_30px_rgba(124,58,237,0.4)] flex items-center justify-center text-white border border-white/20 hover:shadow-[0_0_40px_rgba(124,58,237,0.6)] transition-all duration-300 pointer-events-auto"
       >
-        <Sparkles className="w-6 h-6 absolute opacity-30 animate-pulse" />
         <Bot className="w-6 h-6 relative z-10" />
       </motion.button>
 
