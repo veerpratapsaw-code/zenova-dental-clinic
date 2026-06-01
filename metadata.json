@@ -1,0 +1,6 @@
+{
+  "name": "Zenova Dental Clinic",
+  "description": "Premium futuristic dental clinic website with an advanced digital reservation system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

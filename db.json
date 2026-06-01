@@ -1,0 +1,287 @@
+{
+  "appointments": [
+    {
+      "id": "zen-cqe7ci47v",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Smile Makeover",
+      "preferredDate": "2026-06-02",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "priority",
+      "createdAt": "2026-06-01T04:59:19.769Z",
+      "assignedTime": "09:00"
+    },
+    {
+      "id": "zen-vfzef5lwg",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Root Canal",
+      "preferredDate": "2026-07-12",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "priority",
+      "createdAt": "2026-06-01T04:54:33.091Z",
+      "assignedTime": "09:00"
+    },
+    {
+      "id": "zen-zecbu9m6n",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Cosmetic Dentistry",
+      "preferredDate": "2026-07-12",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "emergency",
+      "createdAt": "2026-06-01T04:52:59.108Z",
+      "assignedTime": "10:30"
+    },
+    {
+      "id": "zen-zgnvyv622",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Dental Implants",
+      "preferredDate": "2026-07-12",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "priority",
+      "createdAt": "2026-06-01T04:52:12.746Z",
+      "assignedTime": "10:00"
+    },
+    {
+      "id": "zen-h6tzoirts",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Smile Makeover",
+      "preferredDate": "5674-03-21",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "priority",
+      "createdAt": "2026-06-01T04:36:18.801Z",
+      "assignedTime": "08:09"
+    },
+    {
+      "id": "zen-o93epbs8w",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Cosmetic Dentistry",
+      "preferredDate": "1212-12-02",
+      "message": "",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "priority",
+      "createdAt": "2026-06-01T04:35:26.686Z",
+      "assignedTime": "14:00"
+    },
+    {
+      "id": "zen-9td1xu01s",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Cosmetic Dentistry",
+      "preferredDate": "1232-03-21",
+      "message": "when i opened my mouth then i can see some thing mushy there of pink color i think that was my tongue so tell me how to cut that as i need no more longer that as i am looking like mental by most of the people",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "priorityLevel": "emergency",
+      "createdAt": "2026-06-01T04:33:23.953Z",
+      "assignedTime": "15:02",
+      "adminNotes": "fctytyvfg8"
+    },
+    {
+      "id": "zen-qbaqwh7bg",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Smile Makeover",
+      "preferredDate": "2030-06-05",
+      "message": "when i opened my mouth then i can see some thing mushy there of pink color i think that was my tongue so tell me how to cut that as i need no more longer that as i am looking like mental by most of the people",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "createdAt": "2026-06-01T04:21:51.690Z"
+    },
+    {
+      "id": "zen-twd1lihoh",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Root Canal",
+      "preferredDate": "0232-03-04",
+      "message": "when i opened my mouth then i can see some thing mushy there of pink color i think that was my tongue so tell me how to cut that as i need no more longer that as i am looking like mental by most of the people",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "createdAt": "2026-06-01T04:03:45.856Z"
+    },
+    {
+      "id": "zen-o5iht4m0a",
+      "name": "veer pratap saw",
+      "phone": "9835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Teeth Whitening",
+      "preferredDate": "2024-04-05",
+      "message": "bjksdfjnklbsdfval",
+      "patientId": "pat-1780243347443",
+      "status": "confirmed",
+      "createdAt": "2026-05-31T16:03:27.593Z"
+    },
+    {
+      "id": "zen-2n3qotye3",
+      "name": "chandni devi",
+      "phone": "09835526977",
+      "email": "chandnid677@gmail.com",
+      "treatmentType": "Dental Implants",
+      "preferredDate": "2332-12-12",
+      "message": "jimmy beter is peter",
+      "status": "cancelled",
+      "createdAt": "2026-05-31T15:59:26.020Z"
+    },
+    {
+      "id": "zen-7hv1tbttr",
+      "name": "Ashok saw",
+      "phone": "6207921808",
+      "email": "ashokankush8888@gmail.com",
+      "treatmentType": "Invisalign Orthodontics",
+      "preferredDate": "1953-05-28",
+      "message": "jam is good",
+      "patientId": "pat-1780223175667",
+      "status": "confirmed",
+      "createdAt": "2026-05-31T13:33:09.139Z"
+    },
+    {
+      "id": "zen-7730jwa2b",
+      "name": "Veer pratap saw",
+      "phone": "09349509403",
+      "email": "om4202010@gmail.com",
+      "treatmentType": "General Physical Assessment",
+      "preferredDate": "2000-08-07",
+      "message": "how to write in my mouth with a ink pen",
+      "patientId": "pat-1780223175667",
+      "status": "cancelled",
+      "createdAt": "2026-05-31T12:21:31.315Z"
+    },
+    {
+      "id": "zen-u131t8tlu",
+      "name": "veer pratap saw",
+      "phone": "09835526977",
+      "email": "veerpratapsaw@gmail.com",
+      "treatmentType": "Cosmetic Dentistry",
+      "preferredDate": "2026-05-01",
+      "message": "kill the elon musk",
+      "status": "cancelled",
+      "createdAt": "2026-05-31T08:51:11.135Z"
+    },
+    {
+      "id": "zen-u00wzf4hz",
+      "name": "chandni devi",
+      "phone": "09835526977",
+      "email": "veerpratapsaw@gmail.com",
+      "treatmentType": "Teeth Whitening",
+      "preferredDate": "0111-04-12",
+      "message": "how to kill om ashutosh named boy without kiling it",
+      "status": "confirmed",
+      "createdAt": "2026-05-31T08:19:00.486Z"
+    },
+    {
+      "id": "zen-uf5ucbyub",
+      "name": "Veer pratap saw",
+      "phone": "09835526977",
+      "email": "veerpratapsaw@gmail.com",
+      "treatmentType": "Teeth Whitening",
+      "preferredDate": "2011-07-06",
+      "message": "help me to remove my brain from the head",
+      "status": "cancelled",
+      "createdAt": "2026-05-31T07:34:19.804Z"
+    },
+    {
+      "id": "zen-1c9g6326k",
+      "name": "shashi shekhar",
+      "phone": "09608106681",
+      "email": "shashishekhar.kth@gmail.com",
+      "treatmentType": "Smile Makeover",
+      "preferredDate": "2026-05-28",
+      "message": "",
+      "status": "confirmed",
+      "createdAt": "2026-05-28T09:14:30.845Z"
+    },
+    {
+      "id": "zen-np5xvv600",
+      "name": "shashi shekhar",
+      "phone": "09608106681",
+      "email": "shashishekhar.kth@gmail.com",
+      "treatmentType": "Teeth Whitening",
+      "preferredDate": "2026-05-28",
+      "message": "",
+      "status": "confirmed",
+      "createdAt": "2026-05-28T09:03:25.764Z"
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "inq-qnjfs2d8x",
+      "name": "veer pratap saw",
+      "email": "veerpratapsaw@gmail.com",
+      "message": "how to kill mosquito by using HCl",
+      "createdAt": "2026-05-31T09:05:17.556Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "super-1780216126652",
+      "email": "chandnid677@gmail.com",
+      "passwordHash": "$2b$10$1qdl.oEhgXBntyTyzp0yR.sp09SbgFMnMAeNn0yJS2lRrJZJIJ8v.",
+      "role": "superadmin",
+      "createdAt": "2026-05-31T08:28:46.652Z"
+    },
+    {
+      "id": "admin-1780222275907",
+      "email": "chandniankush69@gmail.com",
+      "passwordHash": "$2b$10$HAcn/zPPGn/MshXFpBnoCebtgatz9YhAo7eqrxCy2SSYqYKj4gmLe",
+      "role": "admin",
+      "createdAt": "2026-05-31T10:11:15.907Z"
+    },
+    {
+      "id": "admin-1780291815447",
+      "email": "veerpratapsaw@gmail.com",
+      "passwordHash": "$2b$10$iFczOVpoLY0mUyC.D0/rIeSljLbtN.dtt894qbiMufXKv.9da4asm",
+      "role": "admin",
+      "createdAt": "2026-06-01T05:30:15.447Z"
+    }
+  ],
+  "patients": [
+    {
+      "id": "pat-1780223175667",
+      "name": "Veer pratap saw",
+      "email": "9835526977@axl",
+      "phone": "chandnid677@gmail.com",
+      "passwordHash": "$2b$10$SIBe4hke7FMuQIxWnzHbE.RydMPoqHwwdaxzVEx5wvEZCe.stBH4K",
+      "createdAt": "2026-05-31T10:26:15.667Z"
+    },
+    {
+      "id": "pat-1780243298239",
+      "name": "veer pratap saw",
+      "email": "veerpratapsaw@gmail.com",
+      "phone": "9835526977",
+      "passwordHash": "$2b$10$lAftidRvAx6qXni9wNGlbuzPZfUPfmoc/HlX9BGBxPWvB4w5/6njS",
+      "createdAt": "2026-05-31T16:01:38.239Z"
+    },
+    {
+      "id": "pat-1780243347443",
+      "name": "veer pratap saw",
+      "email": "chandnid677@gmail.com",
+      "phone": "9835526977",
+      "passwordHash": "$2b$10$sBTsAaoUsyd18KyQvdpsHOO.x2m4uj0eCbGpWhHD7C6aLNZbhlTUa",
+      "createdAt": "2026-05-31T16:02:27.443Z"
+    }
+  ]
+}
