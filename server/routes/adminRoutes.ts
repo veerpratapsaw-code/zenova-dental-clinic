@@ -481,19 +481,19 @@ router.delete('/services/:id', requireAuth, async (req, res) => {
   }
 });
 
-// Update Settings
 router.put('/settings', requireAuth, async (req, res) => {
   try {
-    const { priorityPrice, emergencyPrice } = req.body;
+    const { priorityPrice, emergencyPrice, formFields } = req.body;
     const { mode } = getDbStatus();
     if (mode === 'mongodb') {
       const { SettingsModel: Settings } = await import('../models/Settings');
       let settings = await Settings.findOne();
       if (!settings) {
-        settings = await Settings.create({ priorityPrice, emergencyPrice });
+        settings = await Settings.create({ priorityPrice, emergencyPrice, formFields });
       } else {
         settings.priorityPrice = priorityPrice;
         settings.emergencyPrice = emergencyPrice;
+        if (formFields) settings.formFields = formFields;
         await settings.save();
       }
       const data = settings.toJSON();
@@ -501,9 +501,10 @@ router.put('/settings', requireAuth, async (req, res) => {
       res.status(200).json({ success: true, data });
     } else {
       const db = getFallbackDb();
-      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500 };
-      db.settings.priorityPrice = priorityPrice;
-      db.settings.emergencyPrice = emergencyPrice;
+      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } };
+      if (priorityPrice !== undefined) db.settings.priorityPrice = priorityPrice;
+      if (emergencyPrice !== undefined) db.settings.emergencyPrice = emergencyPrice;
+      if (formFields !== undefined) db.settings.formFields = formFields;
       saveFallbackDb(db);
       res.status(200).json({ success: true, data: db.settings });
     }

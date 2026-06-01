@@ -81,7 +81,7 @@ export const getFallbackDb = (): FallbackDatabase => {
         blogs: parsed.blogs || [],
         feedbacks: parsed.feedbacks || [],
         services: parsed.services || [],
-        settings: parsed.settings || { priorityPrice: 1000, emergencyPrice: 3500 }
+        settings: parsed.settings || { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } }
       };
     }
   } catch (error) {
@@ -97,7 +97,7 @@ export const getFallbackDb = (): FallbackDatabase => {
     blogs: [], 
     feedbacks: [],
     services: [],
-    settings: { priorityPrice: 1000, emergencyPrice: 3500 }
+    settings: { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } }
   };
 };
 

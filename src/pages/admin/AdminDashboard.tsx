@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   // Settings form state
   const [priorityPriceInput, setPriorityPriceInput] = useState('');
   const [emergencyPriceInput, setEmergencyPriceInput] = useState('');
+  const [formFieldsSettings, setFormFieldsSettings] = useState({ requirePhone: true, requireDate: true, requireMessage: true });
   const [settingsLoading, setSettingsLoading] = useState(false);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -129,6 +130,9 @@ export default function AdminDashboard() {
           setSettingsData(json.data);
           setPriorityPriceInput(json.data.priorityPrice.toString());
           setEmergencyPriceInput(json.data.emergencyPrice.toString());
+          if (json.data.formFields) {
+            setFormFieldsSettings(json.data.formFields);
+          }
         }
       }
     } catch (error) {
@@ -392,7 +396,8 @@ export default function AdminDashboard() {
         },
         body: JSON.stringify({ 
           priorityPrice: Number(priorityPriceInput), 
-          emergencyPrice: Number(emergencyPriceInput) 
+          emergencyPrice: Number(emergencyPriceInput),
+          formFields: formFieldsSettings
         })
       });
       if (res.ok) {
@@ -1088,10 +1093,52 @@ export default function AdminDashboard() {
                       </div>
                     </div>
 
+                    <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/10 rounded-xl p-4 mt-6">
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-white mb-4">Booking Form Customizer</h4>
+                      
+                      <div className="space-y-4">
+                        <label className="flex items-center justify-between cursor-pointer">
+                          <div>
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Require Phone Number</p>
+                            <p className="text-xs text-slate-500">Make phone number a mandatory field for appointments.</p>
+                          </div>
+                          <div className="relative">
+                            <input type="checkbox" className="sr-only" checked={formFieldsSettings.requirePhone} onChange={(e) => setFormFieldsSettings({...formFieldsSettings, requirePhone: e.target.checked})} />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${formFieldsSettings.requirePhone ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formFieldsSettings.requirePhone ? 'transform translate-x-4' : ''}`}></div>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center justify-between cursor-pointer">
+                          <div>
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Require Preferred Date</p>
+                            <p className="text-xs text-slate-500">Force patients to pick a date before submitting.</p>
+                          </div>
+                          <div className="relative">
+                            <input type="checkbox" className="sr-only" checked={formFieldsSettings.requireDate} onChange={(e) => setFormFieldsSettings({...formFieldsSettings, requireDate: e.target.checked})} />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${formFieldsSettings.requireDate ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formFieldsSettings.requireDate ? 'transform translate-x-4' : ''}`}></div>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center justify-between cursor-pointer">
+                          <div>
+                            <p className="text-sm font-bold text-slate-700 dark:text-slate-300">Show Message Box</p>
+                            <p className="text-xs text-slate-500">Allow patients to type custom medical notes.</p>
+                          </div>
+                          <div className="relative">
+                            <input type="checkbox" className="sr-only" checked={formFieldsSettings.requireMessage} onChange={(e) => setFormFieldsSettings({...formFieldsSettings, requireMessage: e.target.checked})} />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${formFieldsSettings.requireMessage ? 'bg-purple-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${formFieldsSettings.requireMessage ? 'transform translate-x-4' : ''}`}></div>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
                     <button 
                       onClick={handleUpdateSettings}
                       disabled={settingsLoading}
-                      className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+                      className="w-full py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity mt-6"
                     >
                       {settingsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Pricing Configuration'}
                     </button>

@@ -34,7 +34,26 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
 
+  // Form Customizer State
+  const [formConfig, setFormConfig] = useState({
+    requirePhone: true,
+    requireDate: true,
+    requireMessage: true
+  });
+
   const { patient } = usePatientAuth();
+
+  // Fetch Form Customizer Settings
+  useEffect(() => {
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data?.formFields) {
+          setFormConfig(json.data.formFields);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -382,7 +401,7 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
                         onChange={handleInputChange}
                         placeholder="e.g. +91 9608106681"
                         className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
-                        required={activeTab === 'appointment'}
+                        required={activeTab === 'appointment' && formConfig.requirePhone}
                       />
                     </div>
 
@@ -400,7 +419,7 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
                         value={formData.preferredDate}
                         onChange={handleInputChange}
                         className="w-full h-12 rounded-xl px-4 text-slate-800 dark:text-slate-100 bg-white/45 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-purple-500 dark:focus:border-purple-400 text-sm font-medium focus:outline-none cursor-text transition-colors"
-                        required={activeTab === 'appointment'}
+                        required={activeTab === 'appointment' && formConfig.requireDate}
                       />
                     </div>
                   </div>
@@ -487,7 +506,8 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
                 )}
 
                 {/* Message input */}
-                <div className="flex flex-col gap-1.5">
+                {(activeTab === 'contact' || formConfig.requireMessage) && (
+                  <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-bold text-slate-500 font-mono uppercase tracking-wide flex items-center gap-1">
                       <MessageSquare className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                     {activeTab === 'appointment' ? 'Medical Notes / Message (Optional)' : 'Inquiry Message'}
@@ -504,6 +524,7 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
                     required={activeTab === 'contact'}
                   />
                 </div>
+                )}
 
                 {/* Priority Upgrade Selector */}
                 {activeTab === 'appointment' && (

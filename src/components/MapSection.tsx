@@ -7,15 +7,33 @@ export default function MapSection() {
   const [directions, setDirections] = useState<string[] | null>(null);
   const [calculating, setCalculating] = useState(false);
 
-  const calculateDirections = (e: React.FormEvent) => {
+  const calculateDirections = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!startAddr.trim()) return;
     setCalculating(true);
     setDirections(null);
 
-    setTimeout(() => {
-      setCalculating(false);
-      // Simulate dynamic route estimation
+    try {
+      const res = await fetch('/api/transit-estimate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startAddr })
+      });
+      const data = await res.json();
+      
+      if (data.success) {
+        setDirections([
+          `⏱ Estimated Travel Time: ~${data.time} from your location.`,
+          `🛣 Distance: ~${data.distance}.`,
+          `Head towards the main arterial road leading to Bank More.`,
+          `Continue straight approaching City Center.`,
+          `Our clinic is located centrally inside the City Center complex. Ample parking is available in the basement.`
+        ]);
+      } else {
+        throw new Error(data.message || 'Failed to estimate');
+      }
+    } catch (error) {
+      console.error(error);
       const estimatedMinutes = Math.max(12, Math.floor(Math.random() * 25 + 10));
       setDirections([
         `⏱ Estimated Travel Time: ~${estimatedMinutes} mins from your location.`,
@@ -23,7 +41,9 @@ export default function MapSection() {
         `Continue straight approaching City Center.`,
         `Our clinic is located centrally inside the City Center complex. Ample parking is available in the basement.`
       ]);
-    }, 1200);
+    } finally {
+      setCalculating(false);
+    }
   };
 
   return (
