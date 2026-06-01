@@ -97,7 +97,7 @@ export default function PatientDashboard() {
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/30 group-hover:scale-105 transition-transform">
               <Activity className="w-5 h-5" />
             </div>
-            <span className="text-xl font-black text-slate-800 dark:text-white tracking-tight">ZENOVA</span>
+            <span className="text-xl font-black text-slate-800 dark:text-white tracking-tight">For Your Dentist</span>
           </Link>
           <div className="h-6 w-px bg-slate-200 dark:bg-white/10 mx-2 hidden sm:block" />
           <span className="text-sm font-bold text-slate-500 dark:text-slate-400 hidden sm:block">Patient Portal</span>

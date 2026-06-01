@@ -156,7 +156,7 @@ export default function Footer() {
             >
               Website Designed & Developed by 
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:to-blue-300 font-extrabold drop-shadow-[0_0_8px_rgba(139,92,246,0.3)] transition-all animate-pulse">
-                Veer Pratap Saw
+                Veer Pratap Saw & Om Ashutosh
               </span>
             </a>
           </div>
