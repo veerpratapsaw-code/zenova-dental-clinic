@@ -436,7 +436,7 @@ export default function Hero({ onBookClick, onExploreClick }: HeroProps) {
               {/* Premium 3D Model Render */}
               <img
                 src={processedImage || jaw3DImage}
-                alt="Zenova Premium Realistic Glossy Jaw 3D Model"
+                alt="For Your Dentist Premium Realistic Glossy Jaw 3D Model"
                 referrerPolicy="no-referrer"
                 style={{ transform: isMobile ? 'none' : 'translateZ(50px)' }}
                 className="w-[95%] h-auto object-contain drop-shadow-[0_15px_40px_rgba(139,92,246,0.25)] sm:drop-shadow-[0_20px_50px_rgba(139,92,246,0.3)] group-hover:scale-102 lg:group-hover:scale-105 transition-transform duration-500 relative z-10"

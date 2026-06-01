@@ -12,7 +12,12 @@ router.get('/appointments', requireAuth, async (req, res) => {
     const { mode } = getDbStatus();
     let data;
     if (mode === 'mongodb') {
-      data = await Appointment.find();
+      const docs = await Appointment.find();
+      data = docs.map(doc => {
+        const obj = doc.toJSON();
+        obj.id = doc.id;
+        return obj;
+      });
     } else {
       const db = getFallbackDb();
       data = db.appointments || [];
@@ -95,7 +100,7 @@ router.post('/appointments/suggest-time', requireAuth, async (req, res) => {
     const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
     
-    const prompt = `You are an AI scheduling assistant for Zenova Dental Clinic.
+    const prompt = `You are an AI scheduling assistant for For Your Dentist.
 A patient has requested an appointment on ${preferredDate} for the following treatment: "${treatmentType}".
 
 Based on standard dental clinic operations:
@@ -139,7 +144,12 @@ router.get('/inquiries', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       // Need Contact model
       const { ContactModel: Contact } = await import('../models/Contact');
-      data = await Contact.find().sort({ createdAt: -1 });
+      const docs = await Contact.find().sort({ createdAt: -1 });
+      data = docs.map((doc: any) => {
+        const obj = doc.toJSON();
+        obj.id = doc.id;
+        return obj;
+      });
     } else {
       const db = getFallbackDb();
       data = db.inquiries || [];
@@ -158,15 +168,15 @@ router.post('/inquiries/:id/draft', requireAuth, async (req, res) => {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'MY_GEMINI_API_KEY') {
-      return res.status(200).json({ success: true, draft: "Hello,\n\nThank you for reaching out to Zenova Dental Clinic. We have received your inquiry: '" + inquiryText + "'.\n\n[Mock AI Draft - Please configure Gemini API Key]\n\nBest regards,\nZenova Team" });
+      return res.status(200).json({ success: true, draft: "Hello,\n\nThank you for reaching out to For Your Dentist. We have received your inquiry: '" + inquiryText + "'.\n\n[Mock AI Draft - Please configure Gemini API Key]\n\nBest regards,\nFor Your Dentist Team" });
     }
 
     const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
     
-    const prompt = `You are a professional dental receptionist at Zenova Dental Clinic. 
+    const prompt = `You are a professional dental receptionist at For Your Dentist. 
 Write a highly empathetic, professional, and helpful email reply to the following patient inquiry. 
-Keep it concise but warm. End with "Best regards, The Zenova Team".
+Keep it concise but warm. End with "Best regards, The For Your Dentist Team".
 Do not use placeholders like [Your Name].
 
 Patient Inquiry: "${inquiryText}"`;
@@ -198,7 +208,7 @@ router.post('/inquiries/:id/reply', requireAuth, async (req, res) => {
       <div style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 40px 20px;">
         <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
           <div style="background-color: #3b82f6; padding: 30px 20px; color: white; text-align: center;">
-            <h1 style="margin: 0; font-size: 20px; font-weight: bold;">Reply from Zenova Dental</h1>
+            <h1 style="margin: 0; font-size: 20px; font-weight: bold;">Reply from For Your Dentist</h1>
           </div>
           <div style="padding: 30px;">
             <p style="color: #475569; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${replyText}</p>
@@ -218,9 +228,9 @@ router.post('/inquiries/:id/reply', requireAuth, async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Zenova Support <onboarding@resend.dev>',
+        from: 'For Your Dentist Support <onboarding@resend.dev>',
         to: [email],
-        subject: 'Re: Your Inquiry with Zenova Dental',
+        subject: 'Re: Your Inquiry with For Your Dentist',
         html: htmlContent,
       }),
     });

@@ -56,7 +56,7 @@ export default function PatientRegister() {
             <Activity className="w-7 h-7 group-hover:rotate-12 transition-transform duration-300" />
           </Link>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight mb-2">Create Account</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Join Zenova for seamless appointment tracking.</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Join For Your Dentist for seamless appointment tracking.</p>
         </div>
 
         {error && (

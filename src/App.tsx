@@ -24,7 +24,7 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <PatientAuthProvider>
-          <div className="relative min-h-screen selection:bg-cyan-500 selection:text-white bg-[#f8fafc] dark:bg-[#0a0a1a] transition-colors duration-500">
+          <div className="relative overflow-x-hidden min-h-screen selection:bg-cyan-500 selection:text-white bg-[#f8fafc] dark:bg-[#0a0a1a] transition-colors duration-500">
             <BrowserRouter>
               <Routes>
                 {/* Public Website */}

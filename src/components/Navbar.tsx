@@ -91,7 +91,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold font-display tracking-tight text-slate-800 leading-tight">
-                Zenova<span className="font-light text-slate-400">Dental</span>
+                For Your Dentist<span className="font-light text-slate-400">Dental</span>
               </span>
             </div>
           </a>
@@ -210,7 +210,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-24 left-[4%] w-[92%] glass-panel rounded-2xl z-40 p-6 shadow-xl border-purple-100/30 lg:hidden block"
+            className="fixed top-24 left-[4%] w-[92%] glass-panel bg-white/95 dark:bg-[#0a0a1a]/95 backdrop-blur-3xl rounded-2xl z-40 p-6 shadow-xl border-purple-100/30 lg:hidden block"
           >
             <div className="flex flex-col gap-4">
               {mobileMenuItems.map((item) => {

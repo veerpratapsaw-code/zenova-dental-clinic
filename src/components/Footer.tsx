@@ -42,7 +42,7 @@ export default function Footer() {
               </div>
               <div className="flex flex-col">
                 <span className="text-xl font-bold font-display tracking-tight text-white leading-tight">
-                  Zenova
+                  For Your Dentist
                 </span>
                 <span className="text-[8px] uppercase tracking-widest font-mono text-purple-400 font-bold leading-none">
                   Dental Clinic
@@ -101,7 +101,7 @@ export default function Footer() {
                 to="/blog"
                 className="hover:text-white hover:translate-x-1.5 transition-all text-left mt-2 pt-2 border-t border-slate-800/50 text-cyan-400 font-bold"
               >
-                Zenova Journal (Blog)
+                For Your Dentist Journal (Blog)
               </Link>
             </div>
           </div>
@@ -139,7 +139,7 @@ export default function Footer() {
         {/* Bottom credits and copyright disclaimer */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-slate-500 font-mono font-bold tracking-wider uppercase">
-            &copy; {currentYear} Zenova Dental Studio. All Rights Reserved.
+            &copy; {currentYear} For Your Dentist Studio. All Rights Reserved.
           </p>
 
           {/* Om Ashutosh glowing credits in display styling */}

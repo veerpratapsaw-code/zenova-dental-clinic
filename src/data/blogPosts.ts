@@ -87,7 +87,7 @@ export const blogPosts: BlogPost[] = [
       <p>Severe pain when you apply pressure to the tooth, such as when biting or chewing food, is a classic indicator that the root is inflamed and requires treatment.</p>
 
       <h2>Act Quickly</h2>
-      <p>If you are experiencing any of these symptoms, do not wait. The longer you put off treatment, the higher the risk of losing the tooth entirely or the infection spreading. Contact Zenova Dental immediately for an emergency assessment.</p>
+      <p>If you are experiencing any of these symptoms, do not wait. The longer you put off treatment, the higher the risk of losing the tooth entirely or the infection spreading. Contact For Your Dentist immediately for an emergency assessment.</p>
     `
   },
   {
@@ -106,7 +106,7 @@ export const blogPosts: BlogPost[] = [
     imageUrl: 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800',
     content: `
       <h2>A New Era of Smile Design</h2>
-      <p>The field of cosmetic dentistry is evolving at a breakneck pace. Technologies that seemed like science fiction just a decade ago are now daily realities in elite clinics like Zenova.</p>
+      <p>The field of cosmetic dentistry is evolving at a breakneck pace. Technologies that seemed like science fiction just a decade ago are now daily realities in elite clinics like For Your Dentist.</p>
       
       <h3>AI-Powered Smile Design</h3>
       <p>Artificial Intelligence is now actively used to design the perfect smile tailored to your facial structure. By analyzing thousands of data points on your face, AI algorithms can predict exactly how different veneer shapes or orthodontic adjustments will look, allowing you to preview your new smile in hyper-realistic 3D before treatment even begins.</p>
@@ -117,8 +117,8 @@ export const blogPosts: BlogPost[] = [
       <h3>Laser Dentistry</h3>
       <p>Lasers have replaced the dreaded drill in many procedures. They offer painless contouring of the gums, precise removal of decay, and faster teeth whitening. Because lasers cauterize as they work, healing times are drastically reduced.</p>
 
-      <h2>The Zenova Difference</h2>
-      <p>At Zenova Dental Clinic, we pride ourselves on staying at the absolute forefront of these technological advancements. By combining elite medical expertise with next-generation technology, we ensure your cosmetic journey is faster, safer, and more stunning than ever before.</p>
+      <h2>The For Your Dentist Difference</h2>
+      <p>At For Your Dentist, we pride ourselves on staying at the absolute forefront of these technological advancements. By combining elite medical expertise with next-generation technology, we ensure your cosmetic journey is faster, safer, and more stunning than ever before.</p>
     `
   }
 ];

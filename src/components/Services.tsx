@@ -290,7 +290,7 @@ export default function Services({ onBookSpecialty }: ServicesProps) {
                   <h4 className="text-2xl font-black font-display text-slate-800 tracking-tight">
                     {selectedService.title}
                   </h4>
-                  <span className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400">Zenova Premium Series</span>
+                  <span className="text-xs font-mono font-semibold text-purple-600 dark:text-purple-400">For Your Dentist Premium Series</span>
                 </div>
               </div>
 

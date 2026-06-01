@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { GoogleGenAI } from '@google/genai';
 
 const SYSTEM_PROMPT = `
-You are Zenova, the highly professional, empathetic, and expert AI Dental Assistant for Zenova Dental Clinic.
+You are For Your Dentist, the highly professional, empathetic, and expert AI Dental Assistant for For Your Dentist.
 Your tone is premium, reassuring, and knowledgeable. You use short, easily readable sentences. 
 Never diagnose medical conditions definitively, but provide helpful guidance and encourage booking an appointment for a physical consultation.
 
@@ -40,7 +40,7 @@ export const handleChat = async (req: Request, res: Response): Promise<void> => 
       setTimeout(() => {
         res.status(200).json({
           success: true,
-          response: "Hello! I am the Zenova AI Assistant. It looks like the Gemini API key hasn't been configured by the site administrator yet, so I am currently running in mock mode. Please ask the administrator to add the GEMINI_API_KEY to the .env file!"
+          response: "Hello! I am the For Your Dentist AI Assistant. It looks like the Gemini API key hasn't been configured by the site administrator yet, so I am currently running in mock mode. Please ask the administrator to add the GEMINI_API_KEY to the .env file!"
         });
       }, 1000);
       return;

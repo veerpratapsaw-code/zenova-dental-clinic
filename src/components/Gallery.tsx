@@ -33,7 +33,7 @@ export default function Gallery() {
     },
     {
       id: 'gallery-treatment',
-      title: 'Zenova Robot-Arm Suite',
+      title: 'For Your Dentist Robot-Arm Suite',
       category: 'Surgery Pod',
       imageUrl: treatmentImg,
       spanClasses: 'md:col-span-2 md:row-span-1'
@@ -70,7 +70,7 @@ export default function Gallery() {
             Translucent spaces for transparent care.
           </h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-base sm:text-lg max-w-2xl mt-2 leading-relaxed">
-            Step into the Zenova Dental environment. We crafted an atmosphere with light oak materials, clean glass walls, micro-filtered air, and organic soundscapes.
+            Step into the For Your Dentist environment. We crafted an atmosphere with light oak materials, clean glass walls, micro-filtered air, and organic soundscapes.
           </p>
         </div>
 

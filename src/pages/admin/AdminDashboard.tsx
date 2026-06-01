@@ -232,7 +232,7 @@ export default function AdminDashboard() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white shadow-md">
               <ShieldCheck className="w-4 h-4" />
             </div>
-            <h1 className="text-lg font-black font-display tracking-tight text-slate-900 dark:text-white">Zenova Portal</h1>
+            <h1 className="text-lg font-black font-display tracking-tight text-slate-900 dark:text-white">For Your Dentist Portal</h1>
           </div>
           <p className="text-[10px] uppercase font-mono font-bold text-slate-400 tracking-wider">
             Admin: {user?.email}
@@ -296,7 +296,7 @@ export default function AdminDashboard() {
             {activeTab} Overview
           </h2>
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Real-time synchronization with Zenova Secure Server.
+            Real-time synchronization with For Your Dentist Secure Server.
           </p>
         </header>
 

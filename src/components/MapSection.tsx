@@ -19,7 +19,7 @@ export default function MapSection() {
         `Merge onto Transit Highway 4, direction Tech Hub District.`,
         `Take Exit 12B toward 'Laser Avenue Parkway'.`,
         `Progress through the biological fountain roundabout, taking the third exit.`,
-        `Zenova Dental Clinic is adjacent to the silver digital sculpture pod on your left. Free basement valet medical parking is secured.`
+        `For Your Dentist is adjacent to the silver digital sculpture pod on your left. Free basement valet medical parking is secured.`
       ]);
     }, 1200);
   };
@@ -40,7 +40,7 @@ export default function MapSection() {
             Visit our medical studio.
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-base font-medium leading-relaxed max-w-2xl mt-1">
-            Centrally situated inside the premium Tech Hub architecture district, Zenova is designed for rapid accessibility via bullet transit and high-capacity parkways.
+            Centrally situated inside the premium Tech Hub architecture district, For Your Dentist is designed for rapid accessibility via bullet transit and high-capacity parkways.
           </p>
         </div>
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
 /**
- * Premium first-visit loading animation with Zenova branding
+ * Premium first-visit loading animation with For Your Dentist branding
  * Shows for 2.2 seconds on first page load, then fades out elegantly
  */
 export default function PageLoader() {
@@ -65,7 +65,7 @@ export default function PageLoader() {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="text-3xl font-black font-display tracking-tight text-white"
               >
-                Zenova<span className="text-violet-400 font-light">Dental</span>
+                For Your Dentist<span className="text-violet-400 font-light">Dental</span>
               </motion.h1>
               <motion.p
                 initial={{ y: 10, opacity: 0 }}

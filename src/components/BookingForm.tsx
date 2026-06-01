@@ -165,7 +165,7 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
       }
     } catch (err) {
       console.error('Submission encounter error:', err);
-      setErrors(['Failed to establish synchronization with the Zenova Secure Server. Please check your network connection.']);
+      setErrors(['Failed to establish synchronization with the For Your Dentist Secure Server. Please check your network connection.']);
     } finally {
       setLoading(false);
     }

@@ -82,7 +82,7 @@ export const connectDB = async (): Promise<boolean> => {
   
   if (!mongoUri || mongoUri.trim() === '') {
     console.warn('\n⚠️ WARNING: MONGODB_URI environment variable is missing.');
-    console.warn('👉 Zenova is operating in low-overhead JSON file-fallback mode [db.json].\n');
+    console.warn('👉 For Your Dentist is operating in low-overhead JSON file-fallback mode [db.json].\n');
     isMongoConnected = false;
     return false;
   }

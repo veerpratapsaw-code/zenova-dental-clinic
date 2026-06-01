@@ -33,7 +33,7 @@ export const sendEmailNotification = async (payload: NotificationPayload): Promi
       
       <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
         <p style="color: #4b5563; font-size: 15px; margin-top: 0; line-height: 1.5;">
-          A new dental appointment has been recorded through the Zenova website booking portal.
+          A new dental appointment has been recorded through the For Your Dentist website booking portal.
         </p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px;">
@@ -91,7 +91,7 @@ Message: ${payload.message || 'None'}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Zenova Dental Portal <onboarding@resend.dev>',
+        from: 'For Your Dentist Portal <onboarding@resend.dev>',
         to: [adminEmail],
         subject: 'New Dental Appointment Booking',
         html: htmlContent,
@@ -125,14 +125,14 @@ export const sendStatusUpdateEmail = async (patientEmail: string, patientName: s
   }
 
   const isConfirmed = status === 'confirmed';
-  const subject = isConfirmed ? 'Your Zenova Appointment is Confirmed! ✅' : 'Update regarding your Zenova Appointment';
+  const subject = isConfirmed ? 'Your For Your Dentist Appointment is Confirmed! ✅' : 'Update regarding your For Your Dentist Appointment';
   const color = isConfirmed ? '#10b981' : '#f59e0b';
   
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 40px 20px; text-align: center;">
       <div style="max-width: 500px; margin: 0 auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.05);">
         <div style="background-color: ${color}; padding: 30px 20px; color: white;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: bold;">Zenova Dental Clinic</h1>
+          <h1 style="margin: 0; font-size: 24px; font-weight: bold;">For Your Dentist</h1>
         </div>
         <div style="padding: 30px;">
           <h2 style="color: #0f172a; font-size: 20px; margin-top: 0;">Hello, ${patientName}!</h2>
@@ -158,7 +158,7 @@ export const sendStatusUpdateEmail = async (patientEmail: string, patientName: s
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Zenova Dental <onboarding@resend.dev>',
+        from: 'For Your Dentist <onboarding@resend.dev>',
         to: [patientEmail],
         subject: subject,
         html: htmlContent,

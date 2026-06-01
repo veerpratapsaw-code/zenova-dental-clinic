@@ -157,7 +157,7 @@ export default function PatientDashboard() {
               </div>
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-2">No Appointments Yet</h3>
               <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
-                You haven't scheduled any treatments with Zenova yet. Ready to perfect your smile?
+                You haven't scheduled any treatments with For Your Dentist yet. Ready to perfect your smile?
               </p>
               <Link to="/" className="inline-block px-6 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white rounded-xl font-bold transition-colors">
                 Book Now
