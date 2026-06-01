@@ -160,14 +160,13 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteAdmin = async (id: string) => {
-    if (!confirm('Remove this administrator?')) return;
     try {
       const res = await fetch(`/api/auth/users/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
-        fetchData();
+        setAdmins(prev => prev.filter(a => a.id !== id));
       }
     } catch (err) {
       console.error(err);
@@ -175,14 +174,13 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteAppointment = async (id: string) => {
-    if (!confirm('Permanently delete this appointment?')) return;
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
-        fetchData();
+        setAppointments(prev => prev.filter(a => a.id !== id));
       }
     } catch (err) {
       console.error(err);
@@ -190,14 +188,13 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteInquiry = async (id: string) => {
-    if (!confirm('Permanently delete this inquiry?')) return;
     try {
       const res = await fetch(`/api/admin/inquiries/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
-        fetchData();
+        setInquiries(prev => prev.filter(i => i.id !== id));
       }
     } catch (err) {
       console.error(err);
