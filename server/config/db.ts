@@ -45,6 +45,23 @@ export interface FallbackDatabase {
     phone: string;
     createdAt: string;
   }>;
+  blogs?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    content: string;
+    author: {
+      name: string;
+      role: string;
+      avatar: string;
+    };
+    date: string;
+    category: string;
+    readTime: string;
+    imageUrl: string;
+    createdAt: string;
+  }>;
 }
 
 // Low-overhead JSON Database Initializer/Reader
@@ -57,7 +74,8 @@ export const getFallbackDb = (): FallbackDatabase => {
         appointments: parsed.appointments || [],
         inquiries: parsed.inquiries || [],
         users: parsed.users || [],
-        patients: parsed.patients || []
+        patients: parsed.patients || [],
+        blogs: parsed.blogs || []
       };
     }
   } catch (error) {
@@ -65,7 +83,7 @@ export const getFallbackDb = (): FallbackDatabase => {
   }
   
   // Return a seeded structure if empty
-  return { appointments: [], inquiries: [], users: [], patients: [] };
+  return { appointments: [], inquiries: [], users: [], patients: [], blogs: [] };
 };
 
 // Persist adjustments back to JSON file

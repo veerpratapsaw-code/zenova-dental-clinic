@@ -1,13 +1,27 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Activity, ArrowLeft } from 'lucide-react';
-import { blogPosts } from '../data/blogPosts';
+import { Activity, ArrowLeft, Loader2 } from 'lucide-react';
 import BlogCard from '../components/BlogCard';
 
 export default function BlogPage() {
+  const [blogs, setBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
+    const fetchBlogs = async () => {
+      try {
+        const res = await fetch('/api/blogs');
+        const json = await res.json();
+        if (json.success) setBlogs(json.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlogs();
   }, []);
 
   return (
@@ -54,11 +68,18 @@ export default function BlogPage() {
         </motion.div>
 
         {/* Blog Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {blogPosts.map((post, idx) => (
-            <BlogCard key={post.id} post={post} index={idx} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {blogs.length === 0 && <p className="text-slate-500 col-span-full text-center">No blogs found.</p>}
+            {blogs.map((post, idx) => (
+              <BlogCard key={post.id} post={post} index={idx} />
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

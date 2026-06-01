@@ -1,25 +1,61 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Activity, ArrowLeft, Calendar, Clock, Share2 } from 'lucide-react';
-import { getBlogPostBySlug, BlogPost } from '../data/blogPosts';
+import { Activity, ArrowLeft, Calendar, Clock, Share2, Loader2 } from 'lucide-react';
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: {
+    name: string;
+    role: string;
+    avatar: string;
+  };
+  date: string;
+  category: string;
+  readTime: string;
+  imageUrl: string;
+}
 
 export default function BlogPostPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (slug) {
-      const foundPost = getBlogPostBySlug(slug);
-      if (foundPost) {
-        setPost(foundPost);
-      } else {
-        navigate('/blog');
+    const fetchPost = async () => {
+      if (slug) {
+        try {
+          const res = await fetch(`/api/blogs/${slug}`);
+          const json = await res.json();
+          if (json.success && json.data) {
+            setPost(json.data);
+          } else {
+            navigate('/blog');
+          }
+        } catch (e) {
+          console.error(e);
+          navigate('/blog');
+        } finally {
+          setLoading(false);
+        }
       }
-    }
+    };
+    fetchPost();
   }, [slug, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[#0a0a1a] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+      </div>
+    );
+  }
 
   if (!post) return null;
 

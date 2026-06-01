@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -14,22 +16,34 @@ import {
   Loader2,
   Trash2,
   Plus,
-  Globe
+  Globe,
+  FileText,
+  Image as ImageIcon
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
 export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins'>('appointments');
+  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs'>('appointments');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
+  const [blogs, setBlogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New Admin form state
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [adminActionLoading, setAdminActionLoading] = useState(false);
+
+  // New Blog form state
+  const [newBlogTitle, setNewBlogTitle] = useState('');
+  const [newBlogCategory, setNewBlogCategory] = useState('');
+  const [newBlogReadTime, setNewBlogReadTime] = useState('');
+  const [newBlogExcerpt, setNewBlogExcerpt] = useState('');
+  const [newBlogContent, setNewBlogContent] = useState('');
+  const [newBlogImage, setNewBlogImage] = useState<string>('');
+  const [blogActionLoading, setBlogActionLoading] = useState(false);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -76,6 +90,10 @@ export default function AdminDashboard() {
         });
         const json = await res.json();
         if (json.success) setAdmins(json.data);
+      } else if (activeTab === 'blogs') {
+        const res = await fetch('/api/blogs');
+        const json = await res.json();
+        if (json.success) setBlogs(json.data);
       }
     } catch (error) {
       console.error('Failed to fetch data');
@@ -167,6 +185,75 @@ export default function AdminDashboard() {
       });
       if (res.ok) {
         setAdmins(prev => prev.filter(a => a.id !== id));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewBlogImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCreateBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBlogActionLoading(true);
+    try {
+      const slug = newBlogTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      const payload = {
+        title: newBlogTitle,
+        slug,
+        category: newBlogCategory,
+        readTime: newBlogReadTime,
+        excerpt: newBlogExcerpt,
+        content: newBlogContent,
+        imageUrl: newBlogImage,
+        author: {
+          name: user?.email?.split('@')[0] || 'Admin',
+          role: 'Clinic Staff',
+          avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=100'
+        }
+      };
+
+      const res = await fetch('/api/admin/blogs', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewBlogTitle('');
+        setNewBlogCategory('');
+        setNewBlogReadTime('');
+        setNewBlogExcerpt('');
+        setNewBlogContent('');
+        setNewBlogImage('');
+        fetchData(); // refresh list
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setBlogActionLoading(false);
+    }
+  };
+
+  const handleDeleteBlog = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/blogs/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setBlogs(prev => prev.filter(b => b.id !== id));
       }
     } catch (err) {
       console.error(err);
@@ -303,6 +390,18 @@ export default function AdminDashboard() {
           >
             <Users className="w-4 h-4" />
             Manage Admins
+          </button>
+
+          <button
+            onClick={() => setActiveTab('blogs')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'blogs'
+                ? 'bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            Manage Blogs
           </button>
         </nav>
 
@@ -556,6 +655,93 @@ export default function AdminDashboard() {
                       className="w-full h-10 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                     >
                       {adminActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Create Admin</>}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+            
+            {/* Blogs View */}
+            {activeTab === 'blogs' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Blog List */}
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden h-fit">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Published Blogs</h3>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
+                    {blogs.length === 0 && <p className="p-6 text-slate-500 text-sm">No blogs published yet.</p>}
+                    {blogs.map(blog => (
+                      <div key={blog.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        {blog.imageUrl && (
+                          <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src={blog.imageUrl} alt={blog.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1 line-clamp-1">{blog.title}</h4>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 line-clamp-2">{blog.excerpt}</p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-200 dark:border-cyan-500/20">{blog.category}</span>
+                            <button onClick={() => handleDeleteBlog(blog.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Create Blog Form */}
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Create New Blog Post</h3>
+                  <form onSubmit={handleCreateBlog} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title</label>
+                      <input type="text" required value={newBlogTitle} onChange={e => setNewBlogTitle(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-cyan-500 dark:text-white text-sm" placeholder="e.g., The Future of Dentistry" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label>
+                        <input type="text" required value={newBlogCategory} onChange={e => setNewBlogCategory(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-cyan-500 dark:text-white text-sm" placeholder="e.g., Technology" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Read Time</label>
+                        <input type="text" required value={newBlogReadTime} onChange={e => setNewBlogReadTime(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-cyan-500 dark:text-white text-sm" placeholder="e.g., 5 min read" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Cover Image</label>
+                      <div className="flex items-center gap-4">
+                        {newBlogImage ? (
+                          <div className="w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-white/10 relative group">
+                            <img src={newBlogImage} alt="Cover Preview" className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                              <Trash2 className="w-4 h-4 text-white cursor-pointer" onClick={() => setNewBlogImage('')} />
+                            </div>
+                          </div>
+                        ) : (
+                          <label className="w-16 h-16 rounded-lg border-2 border-dashed border-slate-300 dark:border-white/20 flex items-center justify-center cursor-pointer hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors">
+                            <ImageIcon className="w-6 h-6 text-slate-400" />
+                            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                          </label>
+                        )}
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Upload high-res image (Max 5MB)</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Short Excerpt</label>
+                      <textarea required value={newBlogExcerpt} onChange={e => setNewBlogExcerpt(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-cyan-500 dark:text-white text-sm resize-none" placeholder="Brief summary for the blog card..." />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Blog Content</label>
+                      <div className="bg-white dark:bg-white text-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10">
+                        <ReactQuill theme="snow" value={newBlogContent} onChange={setNewBlogContent} className="h-64 mb-12" />
+                      </div>
+                    </div>
+                    <button disabled={blogActionLoading || !newBlogTitle || !newBlogContent} type="submit" className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                      {blogActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Publish Blog Post</>}
                     </button>
                   </form>
                 </div>

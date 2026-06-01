@@ -293,4 +293,77 @@ router.post('/inquiries/:id/reply', requireAuth, async (req, res) => {
   }
 });
 
+// Create Blog Post
+router.post('/blogs', requireAuth, async (req, res) => {
+  try {
+    const { title, slug, excerpt, content, category, readTime, imageUrl, author } = req.body;
+    
+    // Process base64 image if it's not a standard URL and ImgBB is configured
+    let finalImageUrl = imageUrl;
+    if (imageUrl && imageUrl.startsWith('data:image') && process.env.IMGBB_API_KEY) {
+      try {
+        const base64Data = imageUrl.split(',')[1];
+        const formData = new URLSearchParams();
+        formData.append('image', base64Data);
+        
+        const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, {
+          method: 'POST',
+          body: formData
+        });
+        
+        const imgData = await imgRes.json();
+        if (imgData.success) {
+          finalImageUrl = imgData.data.url;
+        }
+      } catch (e) {
+        console.error('ImgBB upload failed', e);
+      }
+    }
+
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { BlogModel: Blog } = await import('../models/Blog');
+      const blog = new Blog({ title, slug, excerpt, content, category, readTime, imageUrl: finalImageUrl, author, date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) });
+      await blog.save();
+      res.status(201).json({ success: true, data: blog });
+    } else {
+      const db = getFallbackDb();
+      const newBlog = {
+        id: Date.now().toString(),
+        title, slug, excerpt, content, category, readTime, imageUrl: finalImageUrl, author,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        createdAt: new Date().toISOString()
+      };
+      if (!db.blogs) db.blogs = [];
+      db.blogs.push(newBlog);
+      saveFallbackDb(db);
+      res.status(201).json({ success: true, data: newBlog });
+    }
+  } catch (error) {
+    console.error('Blog creation error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create blog' });
+  }
+});
+
+// Delete Blog Post
+router.delete('/blogs/:id', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { BlogModel: Blog } = await import('../models/Blog');
+      await Blog.findByIdAndDelete(req.params.id);
+      res.status(200).json({ success: true });
+    } else {
+      const db = getFallbackDb();
+      if (db.blogs) {
+        db.blogs = db.blogs.filter(b => b.id !== req.params.id);
+        saveFallbackDb(db);
+      }
+      res.status(200).json({ success: true });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to delete blog' });
+  }
+});
+
 export default router;
