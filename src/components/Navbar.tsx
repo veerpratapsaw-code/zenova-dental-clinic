@@ -90,8 +90,8 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               <div className="absolute inset-0 rounded-xl bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold font-display tracking-tight text-slate-800 leading-tight">
-                For Your Dentist<span className="font-light text-slate-400">Dental</span>
+              <span className="text-xl font-bold font-display tracking-tight text-slate-800 dark:text-white leading-tight">
+                For Your <span className="font-light text-slate-400">Dentist</span>
               </span>
             </div>
           </a>
