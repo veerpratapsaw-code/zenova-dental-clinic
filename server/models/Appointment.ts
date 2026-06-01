@@ -10,6 +10,8 @@ export interface IAppointment extends Document {
   status: 'pending' | 'confirmed' | 'cancelled';
   priorityLevel: 'standard' | 'priority' | 'emergency';
   patientId?: string;
+  assignedTime?: string;
+  adminNotes?: string;
   createdAt: Date;
 }
 
@@ -58,6 +60,14 @@ const AppointmentSchema: Schema = new Schema(
     patientId: {
       type: Schema.Types.ObjectId,
       ref: 'Patient',
+      required: false,
+    },
+    assignedTime: {
+      type: String,
+      required: false,
+    },
+    adminNotes: {
+      type: String,
       required: false,
     }
   },
