@@ -15,11 +15,13 @@ export default function MapSection() {
 
     setTimeout(() => {
       setCalculating(false);
+      // Simulate dynamic route estimation
+      const estimatedMinutes = Math.max(12, Math.floor(Math.random() * 25 + 10));
       setDirections([
-        `Merge onto Transit Highway 4, direction Tech Hub District.`,
-        `Take Exit 12B toward 'Laser Avenue Parkway'.`,
-        `Progress through the biological fountain roundabout, taking the third exit.`,
-        `For Your Dentist is adjacent to the silver digital sculpture pod on your left. Free basement valet medical parking is secured.`
+        `⏱ Estimated Travel Time: ~${estimatedMinutes} mins from your location.`,
+        `Head towards the main arterial road leading to Bank More.`,
+        `Continue straight approaching City Center.`,
+        `Our clinic is located centrally inside the City Center complex. Ample parking is available in the basement.`
       ]);
     }, 1200);
   };
@@ -158,7 +160,7 @@ export default function MapSection() {
           {/* Embedded Google Map */}
           <div className="lg:col-span-7 rounded-[32px] border border-purple-200/50 overflow-hidden relative min-h-[400px] flex items-center justify-center shadow-xl bg-slate-950">
             <iframe 
-              src="https://maps.google.com/maps?q=Dental%20Clinic%20Dhanbad%20Jharkhand&t=&z=14&ie=UTF8&iwloc=&output=embed" 
+              src="https://maps.google.com/maps?q=City%20Center%20Dhanbad&t=&z=15&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               style={{ border: 0, position: 'absolute', top: 0, left: 0 }} 
