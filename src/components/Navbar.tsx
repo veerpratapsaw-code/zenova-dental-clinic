@@ -171,7 +171,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
             )}
 
             {/* Admin Portal Link */}
-            {adminUser && (
+            {(adminUser || patient?.isAdmin) && (
               <Link
                 to="/admin/dashboard"
                 className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-all border border-purple-200 dark:border-purple-500/30 ml-2"
@@ -257,7 +257,7 @@ export default function Navbar({ onBookClick }: NavbarProps) {
               >
                 {patient ? 'Patient Portal' : 'Patient Login'}
               </Link>
-              {adminUser && (
+              {(adminUser || patient?.isAdmin) && (
                 <Link
                   to="/admin/dashboard"
                   onClick={() => setIsOpen(false)}

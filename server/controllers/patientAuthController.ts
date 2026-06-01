@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PatientModel } from '../models/Patient';
+import User from '../models/User';
 import { getDbStatus, getFallbackDb, saveFallbackDb } from '../config/db';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'zenova_super_secret_jwt_key_99';
@@ -88,10 +89,20 @@ export const loginPatient = async (req: Request, res: Response) => {
     const id = dbStatus.connected ? patient._id.toString() : patient.id;
     const token = jwt.sign({ id, role: 'patient' }, JWT_SECRET, { expiresIn: '7d' });
 
+    let isAdmin = false;
+    if (dbStatus.connected) {
+      const admin = await User.findOne({ email });
+      if (admin) isAdmin = true;
+    } else {
+      const db = getFallbackDb();
+      const admin = db.users?.find((u: any) => u.email === email);
+      if (admin) isAdmin = true;
+    }
+
     return res.status(200).json({
       success: true,
       token,
-      patient: { id, name: patient.name, email: patient.email, phone: patient.phone }
+      patient: { id, name: patient.name, email: patient.email, phone: patient.phone, isAdmin }
     });
   } catch (error) {
     console.error('Patient login error:', error);
@@ -105,16 +116,32 @@ export const getPatientMe = async (req: Request, res: Response) => {
   const dbStatus = getDbStatus();
 
   try {
+    let patientData: any = null;
+
     if (dbStatus.connected) {
       const patient = await PatientModel.findById(user.id).select('-passwordHash');
       if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
-      return res.status(200).json({ success: true, patient: { id: patient._id, name: patient.name, email: patient.email, phone: patient.phone } });
+      patientData = { id: patient._id, name: patient.name, email: patient.email, phone: patient.phone };
     } else {
       const db = getFallbackDb();
       const patient = db.patients?.find(p => p.id === user.id);
       if (!patient) return res.status(404).json({ success: false, message: 'Patient not found' });
-      return res.status(200).json({ success: true, patient: { id: patient.id, name: patient.name, email: patient.email, phone: patient.phone } });
+      patientData = { id: patient.id, name: patient.name, email: patient.email, phone: patient.phone };
     }
+
+    let isAdmin = false;
+    if (dbStatus.connected) {
+      const admin = await User.findOne({ email: patientData.email });
+      if (admin) isAdmin = true;
+    } else {
+      const db = getFallbackDb();
+      const admin = db.users?.find((u: any) => u.email === patientData.email);
+      if (admin) isAdmin = true;
+    }
+
+    patientData.isAdmin = isAdmin;
+
+    return res.status(200).json({ success: true, patient: patientData });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error fetching profile' });
   }
