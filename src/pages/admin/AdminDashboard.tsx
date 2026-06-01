@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -12,7 +13,8 @@ import {
   XCircle,
   Loader2,
   Trash2,
-  Plus
+  Plus,
+  Globe
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
@@ -277,7 +279,14 @@ export default function AdminDashboard() {
           </button>
         </nav>
 
-        <div className="p-4 border-t border-slate-200 dark:border-white/10">
+        <div className="p-4 border-t border-slate-200 dark:border-white/10 space-y-2">
+          <Link
+            to="/"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:text-purple-600 hover:bg-purple-50 dark:text-slate-400 dark:hover:text-purple-400 dark:hover:bg-purple-500/10 transition-all"
+          >
+            <Globe className="w-4 h-4" />
+            Go to Website
+          </Link>
           <button
             onClick={logout}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:text-slate-400 dark:hover:bg-rose-500/10 transition-all"
