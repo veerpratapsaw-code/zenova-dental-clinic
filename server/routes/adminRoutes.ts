@@ -82,6 +82,30 @@ router.put('/appointments/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Delete appointment
+router.delete('/appointments/:id', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const apt = await Appointment.findByIdAndDelete(req.params.id);
+      if (!apt) return res.status(404).json({ success: false, message: 'Not found' });
+      res.status(200).json({ success: true, message: 'Deleted successfully' });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.appointments?.findIndex(a => a.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.appointments) {
+        db.appointments.splice(idx, 1);
+        saveFallbackDb(db);
+        res.status(200).json({ success: true, message: 'Deleted successfully' });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error deleting appointment' });
+  }
+});
+
 // AI Suggest Time for Appointment
 router.post('/appointments/suggest-time', requireAuth, async (req, res) => {
   try {
@@ -157,6 +181,31 @@ router.get('/inquiries', requireAuth, async (req, res) => {
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error fetching inquiries' });
+  }
+});
+
+// Delete inquiry
+router.delete('/inquiries/:id', requireAuth, async (req, res) => {
+  try {
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { ContactModel: Contact } = await import('../models/Contact');
+      const contact = await Contact.findByIdAndDelete(req.params.id);
+      if (!contact) return res.status(404).json({ success: false, message: 'Not found' });
+      res.status(200).json({ success: true, message: 'Deleted successfully' });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.inquiries?.findIndex(i => i.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.inquiries) {
+        db.inquiries.splice(idx, 1);
+        saveFallbackDb(db);
+        res.status(200).json({ success: true, message: 'Deleted successfully' });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error deleting inquiry' });
   }
 });
 

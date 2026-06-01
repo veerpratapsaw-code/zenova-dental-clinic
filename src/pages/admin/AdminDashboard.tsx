@@ -174,6 +174,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAppointment = async (id: string) => {
+    if (!confirm('Permanently delete this appointment?')) return;
+    try {
+      const res = await fetch(`/api/admin/appointments/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteInquiry = async (id: string) => {
+    if (!confirm('Permanently delete this inquiry?')) return;
+    try {
+      const res = await fetch(`/api/admin/inquiries/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleDraftAI = async (inquiryId: string, inquiryText: string) => {
     setDraftingLoading(true);
     try {
@@ -373,7 +403,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 pr-6">
                             {apt.status === 'pending' && (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 mb-2">
                                 <button onClick={() => {
                                   setConfirmModalApt(apt);
                                   setAssignedTime('');
@@ -386,6 +416,9 @@ export default function AdminDashboard() {
                                 </button>
                               </div>
                             )}
+                            <button onClick={() => handleDeleteAppointment(apt.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors" title="Delete">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -406,7 +439,12 @@ export default function AdminDashboard() {
                         <h4 className="font-bold text-slate-900 dark:text-white">{inq.name}</h4>
                         <a href={`mailto:${inq.email}`} className="text-xs text-blue-500 hover:underline">{inq.email}</a>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400">{new Date(inq.createdAt).toLocaleDateString()}</span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className="text-[10px] font-mono text-slate-400">{new Date(inq.createdAt).toLocaleDateString()}</span>
+                        <button onClick={() => handleDeleteInquiry(inq.id)} className="p-1 text-slate-400 hover:text-rose-500 transition-colors" title="Delete Inquiry">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                     <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/5 flex-1 mb-4">
                       <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed italic">"{inq.message}"</p>
