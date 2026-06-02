@@ -1598,7 +1598,15 @@ export default function AdminDashboard() {
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title</label><input type="text" required value={newGalleryTitle} onChange={e => setNewGalleryTitle(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label><input type="text" required value={newGalleryCategory} onChange={e => setNewGalleryCategory(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label><input type="text" required value={newGalleryImage} onChange={e => setNewGalleryImage(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
-                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Grid Span Classes (Tailwind)</label><input type="text" value={newGallerySpan} onChange={e => setNewGallerySpan(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" placeholder="md:col-span-1 md:row-span-1" /></div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Image Layout Size</label>
+                      <select required value={newGallerySpan} onChange={e => setNewGallerySpan(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm">
+                        <option value="md:col-span-1 md:row-span-1">Standard (Small)</option>
+                        <option value="md:col-span-2 md:row-span-1">Wide (Horizontal)</option>
+                        <option value="md:col-span-1 md:row-span-2">Tall (Vertical)</option>
+                        <option value="md:col-span-2 md:row-span-2">Large (Featured)</option>
+                      </select>
+                    </div>
                     <div className="flex gap-3">
                       {editingGalleryId && (
                         <button type="button" onClick={handleCancelEditGallery} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">Cancel</button>
