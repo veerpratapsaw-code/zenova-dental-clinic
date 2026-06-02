@@ -32,14 +32,11 @@ export default function MapSection() {
       } else {
         throw new Error(data.message || 'Failed to estimate');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      const estimatedMinutes = Math.max(12, Math.floor(Math.random() * 25 + 10));
       setDirections([
-        `⏱ Estimated Travel Time: ~${estimatedMinutes} mins from your location.`,
-        `Head towards the main arterial road leading to Bank More.`,
-        `Continue straight approaching City Center.`,
-        `Our clinic is located centrally inside the City Center complex. Ample parking is available in the basement.`
+        `⚠️ Error: ${error.message || 'Failed to estimate transit details.'}`,
+        `Please use the Google Maps link below for accurate directions.`
       ]);
     } finally {
       setCalculating(false);
@@ -170,6 +167,16 @@ export default function MapSection() {
                         <p>{step}</p>
                       </div>
                     ))}
+                    
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startAddr)}&destination=City+Center,+Dhanbad,+Jharkhand`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 w-full py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      <MapPin className="w-3.5 h-3.5" />
+                      View Full Directions on Google Maps
+                    </a>
                   </motion.div>
                 )}
               </AnimatePresence>

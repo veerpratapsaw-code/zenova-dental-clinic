@@ -244,9 +244,12 @@ Return the result STRICTLY as a JSON object with this exact structure, no markdo
     res.status(200).json({ success: true, ...result });
   } catch (error) {
     console.error('Transit Estimate Error:', error);
-    // Fallback on error
-    const estimatedMinutes = Math.max(12, Math.floor(Math.random() * 25 + 10));
-    res.status(200).json({ success: true, time: `${estimatedMinutes} mins`, distance: "Unknown" });
+    // Instead of random fallback, return the actual error if it's a quota issue or API error
+    if (error?.status === 429 || (error?.message && error.message.includes('Quota'))) {
+      res.status(429).json({ success: false, message: "AI API Quota Exceeded. Please try again later." });
+    } else {
+      res.status(500).json({ success: false, message: "AI estimation failed. Please try again." });
+    }
   }
 });
 
