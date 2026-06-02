@@ -66,18 +66,47 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       const { GalleryImageModel: GalleryImage } = await import('../models/GalleryImage');
       await GalleryImage.findByIdAndDelete(id);
+      getIO().emit('gallery_update');
+      res.status(200).json({ success: true, message: 'Deleted successfully' });
     } else {
       const db = getFallbackDb();
       if (db.gallery) {
         db.gallery = db.gallery.filter(g => g.id !== id);
         saveFallbackDb(db);
+          }
+      getIO().emit('gallery_update');
+      res.status(200).json({ success: true, message: 'Deleted successfully' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Update gallery image
+router.put('/:id', requireAuth, async (req, res) => {
+  try {
+    const { title, category, spanClasses, imageUrl } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { GalleryImageModel: GalleryImage } = await import('../models/GalleryImage');
+      const item = await GalleryImage.findByIdAndUpdate(req.params.id, { title, category, spanClasses, imageUrl }, { new: true });
+      if (!item) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('gallery_update');
+      res.status(200).json({ success: true, data: item });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.gallery?.findIndex(g => g.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.gallery) {
+        db.gallery[idx] = { ...db.gallery[idx], title, category, spanClasses, imageUrl };
+        saveFallbackDb(db);
+        getIO().emit('gallery_update');
+        res.status(200).json({ success: true, data: db.gallery[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
       }
     }
-    
-    getIO().emit('gallery_update');
-    res.status(200).json({ success: true, message: 'Gallery image deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete gallery image' });
+    res.status(500).json({ success: false, message: 'Server error updating gallery' });
   }
 });
 

@@ -377,6 +377,46 @@ router.delete('/blogs/:id', requireAuth, async (req, res) => {
   }
 });
 
+// Update Blog Post
+router.put('/blogs/:id', requireAuth, async (req, res) => {
+  try {
+    const { title, slug, excerpt, content, category, readTime, imageUrl, author } = req.body;
+    let finalImageUrl = imageUrl;
+    if (imageUrl && imageUrl.startsWith('data:image') && process.env.IMGBB_API_KEY) {
+      try {
+        const base64Data = imageUrl.split(',')[1];
+        const formData = new URLSearchParams();
+        formData.append('image', base64Data);
+        const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=${process.env.IMGBB_API_KEY}`, { method: 'POST', body: formData });
+        const imgData = await imgRes.json();
+        if (imgData.success) finalImageUrl = imgData.data.url;
+      } catch (e) {}
+    }
+
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { BlogModel: Blog } = await import('../models/Blog');
+      const blog = await Blog.findByIdAndUpdate(req.params.id, { title, slug, excerpt, content, category, readTime, imageUrl: finalImageUrl, author }, { new: true });
+      if (!blog) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('blog_update');
+      res.status(200).json({ success: true, data: blog });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.blogs?.findIndex(b => b.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.blogs) {
+        db.blogs[idx] = { ...db.blogs[idx], title, slug, excerpt, content, category, readTime, imageUrl: finalImageUrl, author };
+        saveFallbackDb(db);
+        getIO().emit('blog_update');
+        res.status(200).json({ success: true, data: db.blogs[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update blog' });
+  }
+});
+
 // Get all feedbacks
 router.get('/feedbacks', requireAuth, async (req, res) => {
   try {
@@ -416,6 +456,34 @@ router.put('/feedbacks/:id/approve', requireAuth, async (req, res) => {
       const idx = db.feedbacks?.findIndex(f => f.id === req.params.id);
       if (idx !== undefined && idx !== -1 && db.feedbacks) {
         db.feedbacks[idx].isApproved = isApproved;
+        saveFallbackDb(db);
+        getIO().emit('feedback_update');
+        res.status(200).json({ success: true, data: db.feedbacks[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update feedback' });
+  }
+});
+
+// Update feedback content
+router.put('/feedbacks/:id', requireAuth, async (req, res) => {
+  try {
+    const { author, quote, rating, treatmentRecieved } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { FeedbackModel: Feedback } = await import('../models/Feedback');
+      const feedback = await Feedback.findByIdAndUpdate(req.params.id, { author, quote, rating, treatmentRecieved }, { new: true });
+      if (!feedback) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('feedback_update');
+      res.status(200).json({ success: true, data: feedback });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.feedbacks?.findIndex(f => f.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.feedbacks) {
+        db.feedbacks[idx] = { ...db.feedbacks[idx], author, quote, rating, treatmentRecieved };
         saveFallbackDb(db);
         getIO().emit('feedback_update');
         res.status(200).json({ success: true, data: db.feedbacks[idx] });
@@ -521,10 +589,39 @@ router.put('/settings', requireAuth, async (req, res) => {
       if (emergencyPrice !== undefined) db.settings.emergencyPrice = emergencyPrice;
       if (formFields !== undefined) db.settings.formFields = formFields;
       saveFallbackDb(db);
+      getIO().emit('settings_update');
       res.status(200).json({ success: true, data: db.settings });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update settings' });
+  }
+});
+
+// Update service
+router.put('/services/:id', requireAuth, async (req, res) => {
+  try {
+    const { title, description, iconName, details, duration, avgCost, order } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { ServiceModel: Service } = await import('../models/Service');
+      const item = await Service.findByIdAndUpdate(req.params.id, { title, description, iconName, details, duration, avgCost, order }, { new: true });
+      if (!item) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('services_update');
+      res.status(200).json({ success: true, data: item });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.services?.findIndex(s => s.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.services) {
+        db.services[idx] = { ...db.services[idx], title, description, iconName, details, duration, avgCost, order };
+        saveFallbackDb(db);
+        getIO().emit('services_update');
+        res.status(200).json({ success: true, data: db.services[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error updating service' });
   }
 });
 

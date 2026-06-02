@@ -66,18 +66,47 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       const { DoctorModel: Doctor } = await import('../models/Doctor');
       await Doctor.findByIdAndDelete(id);
+      getIO().emit('doctors_update');
+      res.status(200).json({ success: true, message: 'Doctor deleted' });
     } else {
       const db = getFallbackDb();
       if (db.doctors) {
         db.doctors = db.doctors.filter(d => d.id !== id);
         saveFallbackDb(db);
       }
+      getIO().emit('doctors_update');
+      res.status(200).json({ success: true, message: 'Deleted successfully' });
     }
-    
-    getIO().emit('doctors_update');
-    res.status(200).json({ success: true, message: 'Doctor deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete doctor' });
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// Update doctor
+router.put('/:id', requireAuth, async (req, res) => {
+  try {
+    const { name, role, experience, imageURL, specialty, education, bio, daysAvailable } = req.body;
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { DoctorModel: Doctor } = await import('../models/Doctor');
+      const item = await Doctor.findByIdAndUpdate(req.params.id, { name, role, experience, imageURL, specialty, education, bio, daysAvailable }, { new: true });
+      if (!item) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('doctors_update');
+      res.status(200).json({ success: true, data: item });
+    } else {
+      const db = getFallbackDb();
+      const idx = db.doctors?.findIndex(d => d.id === req.params.id);
+      if (idx !== undefined && idx !== -1 && db.doctors) {
+        db.doctors[idx] = { ...db.doctors[idx], name, role, experience, imageURL, specialty, education, bio, daysAvailable };
+        saveFallbackDb(db);
+        getIO().emit('doctors_update');
+        res.status(200).json({ success: true, data: db.doctors[idx] });
+      } else {
+        res.status(404).json({ success: false, message: 'Not found' });
+      }
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error updating doctor' });
   }
 });
 

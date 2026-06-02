@@ -21,9 +21,15 @@ export default function BlogCard({ post, index }: BlogCardProps) {
       <div className="relative h-56 overflow-hidden">
         <div className="absolute inset-0 bg-slate-900/10 dark:bg-black/20 z-10 group-hover:bg-transparent transition-colors duration-500" />
         <img 
-          src={post.imageUrl} 
+          src={post.imageUrl || 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=600&auto=format&fit=crop'} 
           alt={post.title}
           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            if (!target.src.includes('unsplash.com')) {
+              target.src = 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=600&auto=format&fit=crop';
+            }
+          }}
         />
         {/* Category Badge */}
         <div className="absolute top-4 left-4 z-20">
@@ -59,9 +65,15 @@ export default function BlogCard({ post, index }: BlogCardProps) {
         <div className="flex items-center justify-between mt-auto pt-5 border-t border-slate-100 dark:border-white/10">
           <div className="flex items-center gap-3">
             <img 
-              src={post.author.avatar} 
+              src={post.author.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=E0E7FF&color=4F46E5&size=100`} 
               alt={post.author.name}
               className="w-8 h-8 rounded-full object-cover ring-2 ring-white dark:ring-black shadow-sm"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                if (!target.src.includes('ui-avatars.com')) {
+                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.name)}&background=E0E7FF&color=4F46E5&size=100`;
+                }
+              }}
             />
             <div>
               <p className="text-xs font-bold text-slate-800 dark:text-white">{post.author.name}</p>

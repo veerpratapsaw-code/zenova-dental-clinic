@@ -96,10 +96,16 @@ export default function Doctors({ onDoctorConsult }: DoctorsProps) {
               <div className="relative w-36 h-36 rounded-full p-1.5 mb-5 bg-radial from-purple-400 to-blue-500 group-hover:scale-105 transition-transform duration-300 shadow-md">
                 <div className="absolute inset-0 rounded-full blur-md opacity-20 bg-gradient-to-tr from-purple-400 to-blue-500 group-hover:opacity-75 transition-opacity" />
                 <img
-                  src={doc.imageURL}
+                  src={doc.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(doc.name)}&background=E0E7FF&color=4F46E5&size=400`}
                   alt={doc.name}
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover rounded-full select-none"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (!target.src.includes('ui-avatars.com')) {
+                      target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(doc.name)}&background=E0E7FF&color=4F46E5&size=400`;
+                    }
+                  }}
                 />
               </div>
 

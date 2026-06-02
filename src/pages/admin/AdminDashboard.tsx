@@ -20,7 +20,9 @@ import {
   Image as ImageIcon,
   Star,
   Settings as SettingsIcon,
-  ClipboardList
+  ClipboardList,
+  Pencil,
+  Check
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
@@ -38,6 +40,13 @@ export default function AdminDashboard() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [settingsData, setSettingsData] = useState({ priorityPrice: 1000, emergencyPrice: 3500 });
   const [loading, setLoading] = useState(true);
+
+  // Edit tracking states
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+  const [editingGalleryId, setEditingGalleryId] = useState<string | null>(null);
+  const [editingDoctorId, setEditingDoctorId] = useState<string | null>(null);
+  const [editingFeedbackId, setEditingFeedbackId] = useState<string | null>(null);
 
   // New Admin form state
   const [newAdminEmail, setNewAdminEmail] = useState('');
@@ -86,6 +95,13 @@ export default function AdminDashboard() {
   const [newDoctorBio, setNewDoctorBio] = useState('');
   const [newDoctorDays, setNewDoctorDays] = useState('Mon,Tue,Wed');
   const [doctorActionLoading, setDoctorActionLoading] = useState(false);
+
+  // Feedback form state
+  const [newFeedbackAuthor, setNewFeedbackAuthor] = useState('');
+  const [newFeedbackQuote, setNewFeedbackQuote] = useState('');
+  const [newFeedbackRating, setNewFeedbackRating] = useState(5);
+  const [newFeedbackTreatment, setNewFeedbackTreatment] = useState('');
+  const [feedbackActionLoading, setFeedbackActionLoading] = useState(false);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -330,8 +346,11 @@ export default function AdminDashboard() {
         }
       };
 
-      const res = await fetch('/api/admin/blogs', {
-        method: 'POST',
+      const url = editingBlogId ? `/api/admin/blogs/${editingBlogId}` : '/api/admin/blogs';
+      const method = editingBlogId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
@@ -339,12 +358,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        setNewBlogTitle('');
-        setNewBlogCategory('');
-        setNewBlogReadTime('');
-        setNewBlogExcerpt('');
-        setNewBlogContent('');
-        setNewBlogImage('');
+        handleCancelEditBlog();
         fetchData(); // refresh list
       }
     } catch (err) {
@@ -352,6 +366,27 @@ export default function AdminDashboard() {
     } finally {
       setBlogActionLoading(false);
     }
+  };
+
+  const handleEditBlog = (blog: any) => {
+    setEditingBlogId(blog.id);
+    setNewBlogTitle(blog.title);
+    setNewBlogCategory(blog.category);
+    setNewBlogReadTime(blog.readTime);
+    setNewBlogExcerpt(blog.excerpt);
+    setNewBlogContent(blog.content);
+    setNewBlogImage(blog.imageUrl || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEditBlog = () => {
+    setEditingBlogId(null);
+    setNewBlogTitle('');
+    setNewBlogCategory('');
+    setNewBlogReadTime('');
+    setNewBlogExcerpt('');
+    setNewBlogContent('');
+    setNewBlogImage('');
   };
 
   const handleDeleteBlog = async (id: string) => {
@@ -400,6 +435,54 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleEditFeedback = (fb: any) => {
+    setEditingFeedbackId(fb.id);
+    setNewFeedbackAuthor(fb.author);
+    setNewFeedbackQuote(fb.quote);
+    setNewFeedbackRating(fb.rating);
+    setNewFeedbackTreatment(fb.treatmentRecieved || '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEditFeedback = () => {
+    setEditingFeedbackId(null);
+    setNewFeedbackAuthor('');
+    setNewFeedbackQuote('');
+    setNewFeedbackRating(5);
+    setNewFeedbackTreatment('');
+  };
+
+  const handleUpdateFeedback = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingFeedbackId) return;
+    setFeedbackActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/feedbacks/${editingFeedbackId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({
+          author: newFeedbackAuthor,
+          quote: newFeedbackQuote,
+          rating: newFeedbackRating,
+          treatmentRecieved: newFeedbackTreatment
+        })
+      });
+      if (res.ok) {
+        handleCancelEditFeedback();
+        // Since getIO().emit('feedback_update') is called in backend, it should refresh via socket, 
+        // but let's call fetchData just in case.
+        fetchData();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFeedbackActionLoading(false);
+    }
+  };
+
   const handleCreateService = async (e: React.FormEvent) => {
     e.preventDefault();
     setServiceActionLoading(true);
@@ -414,8 +497,11 @@ export default function AdminDashboard() {
         order: services.length + 1
       };
 
-      const res = await fetch('/api/admin/services', {
-        method: 'POST',
+      const url = editingServiceId ? `/api/admin/services/${editingServiceId}` : '/api/admin/services';
+      const method = editingServiceId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}` 
@@ -423,12 +509,7 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        setNewServiceTitle('');
-        setNewServiceDesc('');
-        setNewServiceIcon('Stethoscope');
-        setNewServiceDetails('');
-        setNewServiceDuration('');
-        setNewServiceCost('');
+        handleCancelEditService();
         fetchData(); // refresh list
       }
     } catch (err) {
@@ -436,6 +517,27 @@ export default function AdminDashboard() {
     } finally {
       setServiceActionLoading(false);
     }
+  };
+
+  const handleEditService = (service: any) => {
+    setEditingServiceId(service.id);
+    setNewServiceTitle(service.title);
+    setNewServiceDesc(service.description);
+    setNewServiceIcon(service.iconName);
+    setNewServiceDetails(service.details.join(', '));
+    setNewServiceDuration(service.duration);
+    setNewServiceCost(service.avgCost);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEditService = () => {
+    setEditingServiceId(null);
+    setNewServiceTitle('');
+    setNewServiceDesc('');
+    setNewServiceIcon('Stethoscope');
+    setNewServiceDetails('');
+    setNewServiceDuration('');
+    setNewServiceCost('');
   };
 
   const handleDeleteService = async (id: string) => {
@@ -503,16 +605,35 @@ export default function AdminDashboard() {
     setGalleryActionLoading(true);
     try {
       const payload = { title: newGalleryTitle, category: newGalleryCategory, imageUrl: newGalleryImage, spanClasses: newGallerySpan };
-      const res = await fetch('/api/admin/gallery', {
-        method: 'POST',
+      const url = editingGalleryId ? `/api/admin/gallery/${editingGalleryId}` : '/api/admin/gallery';
+      const method = editingGalleryId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        setNewGalleryTitle(''); setNewGalleryCategory(''); setNewGalleryImage(''); setNewGallerySpan('md:col-span-1 md:row-span-1');
+        handleCancelEditGallery();
         fetchData();
       }
     } catch (err) { console.error(err); } finally { setGalleryActionLoading(false); }
+  };
+
+  const handleEditGallery = (item: any) => {
+    setEditingGalleryId(item.id);
+    setNewGalleryTitle(item.title);
+    setNewGalleryCategory(item.category);
+    setNewGalleryImage(item.imageUrl);
+    setNewGallerySpan(item.spanClasses);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEditGallery = () => {
+    setEditingGalleryId(null);
+    setNewGalleryTitle('');
+    setNewGalleryCategory('');
+    setNewGalleryImage('');
+    setNewGallerySpan('md:col-span-1 md:row-span-1');
   };
 
   const handleDeleteGallery = async (id: string) => {
@@ -530,17 +651,43 @@ export default function AdminDashboard() {
         name: newDoctorName, role: newDoctorRole, experience: newDoctorExperience, imageURL: newDoctorImage, 
         specialty: newDoctorSpecialty, education: newDoctorEducation, bio: newDoctorBio, daysAvailable: newDoctorDays.split(',').map(d => d.trim()) 
       };
-      const res = await fetch('/api/admin/doctors', {
-        method: 'POST',
+      const url = editingDoctorId ? `/api/admin/doctors/${editingDoctorId}` : '/api/admin/doctors';
+      const method = editingDoctorId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
-        setNewDoctorName(''); setNewDoctorRole(''); setNewDoctorExperience(''); setNewDoctorImage(''); 
-        setNewDoctorSpecialty(''); setNewDoctorEducation(''); setNewDoctorBio(''); setNewDoctorDays('Mon,Tue,Wed');
+        handleCancelEditDoctor();
         fetchData();
       }
     } catch (err) { console.error(err); } finally { setDoctorActionLoading(false); }
+  };
+
+  const handleEditDoctor = (doctor: any) => {
+    setEditingDoctorId(doctor.id);
+    setNewDoctorName(doctor.name);
+    setNewDoctorRole(doctor.role);
+    setNewDoctorExperience(doctor.experience);
+    setNewDoctorImage(doctor.imageURL);
+    setNewDoctorSpecialty(doctor.specialty);
+    setNewDoctorEducation(doctor.education);
+    setNewDoctorBio(doctor.bio);
+    setNewDoctorDays(doctor.daysAvailable.join(', '));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCancelEditDoctor = () => {
+    setEditingDoctorId(null);
+    setNewDoctorName('');
+    setNewDoctorRole('');
+    setNewDoctorExperience('');
+    setNewDoctorImage('');
+    setNewDoctorSpecialty('');
+    setNewDoctorEducation('');
+    setNewDoctorBio('');
+    setNewDoctorDays('Mon,Tue,Wed');
   };
 
   const handleDeleteDoctor = async (id: string) => {
@@ -1039,9 +1186,14 @@ export default function AdminDashboard() {
                           <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 line-clamp-2">{blog.excerpt}</p>
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-200 dark:border-cyan-500/20">{blog.category}</span>
-                            <button onClick={() => handleDeleteBlog(blog.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleEditBlog(blog)} className="p-1.5 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleDeleteBlog(blog.id)} className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1051,7 +1203,9 @@ export default function AdminDashboard() {
 
                 {/* Create Blog Form */}
                 <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
-                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Create New Blog Post</h3>
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">
+                    {editingBlogId ? 'Edit Blog Post' : 'Create New Blog Post'}
+                  </h3>
                   <form onSubmit={handleCreateBlog} className="space-y-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title</label>
@@ -1096,9 +1250,16 @@ export default function AdminDashboard() {
                         <textarea required value={newBlogContent} onChange={e => setNewBlogContent(e.target.value)} className="w-full h-64 p-4 bg-transparent focus:outline-none focus:border-cyan-500 dark:text-white text-sm resize-none" placeholder="Write your full blog post content here... (HTML tags are supported for formatting)" />
                       </div>
                     </div>
-                    <button disabled={blogActionLoading || !newBlogTitle || !newBlogContent} type="submit" className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
-                      {blogActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Publish Blog Post</>}
-                    </button>
+                    <div className="flex gap-3">
+                      {editingBlogId && (
+                        <button type="button" onClick={handleCancelEditBlog} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center transition-colors">
+                          Cancel
+                        </button>
+                      )}
+                      <button disabled={blogActionLoading || !newBlogTitle || !newBlogContent} type="submit" className="flex-[2] py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                        {blogActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> {editingBlogId ? 'Update Blog Post' : 'Publish Blog Post'}</>}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -1107,6 +1268,37 @@ export default function AdminDashboard() {
             {/* Feedbacks View */}
             {activeTab === 'feedbacks' && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {editingFeedbackId && (
+                  <div className="bg-white dark:bg-[#0f0f23]/80 p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm col-span-full">
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Edit Feedback</h3>
+                    <form onSubmit={handleUpdateFeedback} className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Author Name</label>
+                          <input type="text" required value={newFeedbackAuthor} onChange={e => setNewFeedbackAuthor(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Rating (1-5)</label>
+                          <input type="number" min="1" max="5" required value={newFeedbackRating} onChange={e => setNewFeedbackRating(Number(e.target.value))} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Treatment Received</label>
+                        <input type="text" value={newFeedbackTreatment} onChange={e => setNewFeedbackTreatment(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Review Quote</label>
+                        <textarea required value={newFeedbackQuote} onChange={e => setNewFeedbackQuote(e.target.value)} className="w-full h-24 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm resize-none" />
+                      </div>
+                      <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={handleCancelEditFeedback} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold">Cancel</button>
+                        <button disabled={feedbackActionLoading} type="submit" className="flex-[2] py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-bold disabled:opacity-50 flex items-center justify-center gap-2">
+                          {feedbackActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Update Feedback</>}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
                 {feedbacks.length === 0 && <p className="text-slate-500 col-span-full">No feedbacks submitted yet.</p>}
                 {feedbacks.map((fb) => (
                   <div key={fb.id} className="bg-white dark:bg-[#0f0f23]/80 p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm flex flex-col">
@@ -1122,9 +1314,14 @@ export default function AdminDashboard() {
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-[10px] font-mono text-slate-400">{new Date(fb.createdAt).toLocaleDateString()}</span>
-                        <button onClick={() => handleDeleteFeedback(fb.id)} className="p-1 text-slate-400 hover:text-rose-500 transition-colors" title="Delete Feedback">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1">
+                          <button onClick={() => handleEditFeedback(fb)} className="p-1 text-slate-400 hover:text-blue-500 transition-colors" title="Edit Feedback">
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => handleDeleteFeedback(fb.id)} className="p-1 text-rose-400 hover:text-rose-600 transition-colors" title="Permanently Delete Review">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <div className="bg-slate-50 dark:bg-white/5 p-4 rounded-xl border border-slate-100 dark:border-white/5 flex-1 mb-4">
@@ -1172,9 +1369,14 @@ export default function AdminDashboard() {
                             <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-500/20">
                               Icon: {service.iconName}
                             </span>
-                            <button onClick={() => handleDeleteService(service.id)} className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => handleEditService(service)} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button onClick={() => handleDeleteService(service.id)} className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1184,7 +1386,9 @@ export default function AdminDashboard() {
 
                 {/* Create Service Form */}
                 <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
-                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add New Service</h3>
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">
+                    {editingServiceId ? 'Edit Service' : 'Add New Service'}
+                  </h3>
                   <form onSubmit={handleCreateService} className="space-y-4">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Service Title</label>
@@ -1212,9 +1416,17 @@ export default function AdminDashboard() {
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Bullet Details (Comma separated)</label>
                       <textarea required value={newServiceDetails} onChange={e => setNewServiceDetails(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-amber-500 dark:text-white text-sm resize-none" placeholder="Detail 1, Detail 2, Detail 3..." />
                     </div>
-                    <button disabled={serviceActionLoading || !newServiceTitle} type="submit" className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
-                      {serviceActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> Add Service</>}
-                    </button>
+                    </div>
+                    <div className="flex gap-3">
+                      {editingServiceId && (
+                        <button type="button" onClick={handleCancelEditService} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold flex items-center justify-center transition-colors">
+                          Cancel
+                        </button>
+                      )}
+                      <button disabled={serviceActionLoading || !newServiceTitle} type="submit" className="flex-[2] py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                        {serviceActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Plus className="w-4 h-4" /> {editingServiceId ? 'Update Service' : 'Add Service'}</>}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -1350,12 +1562,19 @@ export default function AdminDashboard() {
                     {gallery.map(item => (
                       <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         <img src={item.imageUrl} alt={item.title} className="w-16 h-16 rounded object-cover" />
-                        <div className="flex-1">
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.title}</h4>
-                          <p className="text-xs text-slate-500 mb-2">{item.category} • {item.spanClasses}</p>
-                          <button onClick={() => handleDeleteGallery(item.id)} className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="flex-1 flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.title}</h4>
+                            <p className="text-xs text-slate-500 mb-2">{item.category} • {item.spanClasses}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleEditGallery(item)} className="p-1.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteGallery(item.id)} className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1363,13 +1582,22 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
-                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add Gallery Image</h3>
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">
+                    {editingGalleryId ? 'Edit Gallery Image' : 'Add Gallery Image'}
+                  </h3>
                   <form onSubmit={handleCreateGallery} className="space-y-4">
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title</label><input type="text" required value={newGalleryTitle} onChange={e => setNewGalleryTitle(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label><input type="text" required value={newGalleryCategory} onChange={e => setNewGalleryCategory(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label><input type="text" required value={newGalleryImage} onChange={e => setNewGalleryImage(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Grid Span Classes (Tailwind)</label><input type="text" value={newGallerySpan} onChange={e => setNewGallerySpan(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" placeholder="md:col-span-1 md:row-span-1" /></div>
-                    <button disabled={galleryActionLoading} type="submit" className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">{galleryActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Image'}</button>
+                    <div className="flex gap-3">
+                      {editingGalleryId && (
+                        <button type="button" onClick={handleCancelEditGallery} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">Cancel</button>
+                      )}
+                      <button disabled={galleryActionLoading} type="submit" className="flex-[2] py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                        {galleryActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingGalleryId ? 'Update Image' : 'Add Image')}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>
@@ -1387,12 +1615,19 @@ export default function AdminDashboard() {
                     {doctors.map(item => (
                       <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         <img src={item.imageURL} alt={item.name} className="w-16 h-16 rounded object-cover" />
-                        <div className="flex-1">
-                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.name}</h4>
-                          <p className="text-xs text-slate-500 mb-2">{item.role} • {item.experience}</p>
-                          <button onClick={() => handleDeleteDoctor(item.id)} className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                        <div className="flex-1 flex justify-between items-start">
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.name}</h4>
+                            <p className="text-xs text-slate-500 mb-2">{item.role} • {item.experience}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => handleEditDoctor(item)} className="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => handleDeleteDoctor(item.id)} className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1400,7 +1635,9 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
-                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add Doctor</h3>
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">
+                    {editingDoctorId ? 'Edit Doctor' : 'Add Doctor'}
+                  </h3>
                   <form onSubmit={handleCreateDoctor} className="space-y-4">
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Name</label><input type="text" required value={newDoctorName} onChange={e => setNewDoctorName(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Role</label><input type="text" required value={newDoctorRole} onChange={e => setNewDoctorRole(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
@@ -1410,7 +1647,14 @@ export default function AdminDashboard() {
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Education</label><input type="text" required value={newDoctorEducation} onChange={e => setNewDoctorEducation(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Days Available (Comma sep)</label><input type="text" required value={newDoctorDays} onChange={e => setNewDoctorDays(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
                     <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Bio</label><textarea required value={newDoctorBio} onChange={e => setNewDoctorBio(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm resize-none"></textarea></div>
-                    <button disabled={doctorActionLoading} type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">{doctorActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Doctor'}</button>
+                    <div className="flex gap-3">
+                      {editingDoctorId && (
+                        <button type="button" onClick={handleCancelEditDoctor} className="flex-1 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 rounded-xl font-bold transition-colors">Cancel</button>
+                      )}
+                      <button disabled={doctorActionLoading} type="submit" className="flex-[2] py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">
+                        {doctorActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (editingDoctorId ? 'Update Doctor' : 'Add Doctor')}
+                      </button>
+                    </div>
                   </form>
                 </div>
               </div>

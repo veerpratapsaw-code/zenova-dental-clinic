@@ -119,12 +119,18 @@ export default function Gallery() {
               className={`group relative rounded-[32px] overflow-hidden cursor-pointer shadow-xs border border-white/80 dark:border-white/10 ${item.spanClasses}`}
             >
               <motion.img
-                src={item.imageUrl}
+                src={item.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=600&auto=format&fit=crop'}
                 alt={item.title}
                 referrerPolicy="no-referrer"
                 whileHover={{ scale: 1.08 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full h-full object-cover filter group-hover:brightness-[0.85]"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('unsplash.com')) {
+                    target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=600&auto=format&fit=crop';
+                  }
+                }}
               />
 
               {/* Hover aesthetic curtain layout */}
@@ -181,6 +187,12 @@ export default function Gallery() {
                 alt="Clinic High Definition Review"
                 referrerPolicy="no-referrer"
                 className="w-full h-auto max-h-[85vh] object-contain mx-auto"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  if (!target.src.includes('unsplash.com')) {
+                    target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=600&auto=format&fit=crop';
+                  }
+                }}
               />
             </motion.div>
           </div>
