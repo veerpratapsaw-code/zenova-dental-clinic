@@ -633,7 +633,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     setSettingsLoading(true);
     try {
-      const res = await fetch('/api/settings/hero-stats', {
+      const res = await fetch('/api/admin/settings/hero-stats', {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

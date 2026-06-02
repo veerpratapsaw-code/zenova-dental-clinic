@@ -639,6 +639,36 @@ router.put('/settings', requireAuth, async (req, res) => {
   }
 });
 
+router.put('/settings/hero-stats', requireAuth, async (req, res) => {
+  try {
+    const { heroStats } = req.body;
+    if (!heroStats) {
+      res.status(400).json({ success: false, message: 'heroStats required' });
+      return;
+    }
+    const { mode } = getDbStatus();
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('../models/Settings');
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create({ heroStats });
+      } else {
+        settings.heroStats = heroStats;
+        await settings.save();
+      }
+      res.status(200).json({ success: true, data: settings });
+    } else {
+      const db = getFallbackDb();
+      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500, demoMode: false, formFields: { requirePhone: true, requireDate: true, requireMessage: true } };
+      db.settings.heroStats = heroStats;
+      saveFallbackDb(db);
+      res.status(200).json({ success: true, data: db.settings });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to update hero stats' });
+  }
+});
+
 // Update service
 router.put('/services/:id', requireAuth, async (req, res) => {
   try {
