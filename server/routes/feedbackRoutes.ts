@@ -30,7 +30,7 @@ router.get('/', async (req, res) => {
 // Submit a new feedback
 router.post('/', async (req, res) => {
   try {
-    const { author, quote, rating, treatmentRecieved } = req.body;
+    const { author, quote, rating, treatmentRecieved, avatarUrl } = req.body;
     
     // Validate
     if (!author || !quote || !rating || !treatmentRecieved) {
@@ -45,7 +45,8 @@ router.post('/', async (req, res) => {
         quote,
         rating,
         treatmentRecieved,
-        isApproved: false // Requires admin approval
+        isApproved: false, // Requires admin approval
+        ...(avatarUrl && { avatarUrl })
       });
       await feedback.save();
       res.status(201).json({ success: true, data: feedback });
@@ -58,6 +59,7 @@ router.post('/', async (req, res) => {
         rating,
         treatmentRecieved,
         isApproved: false,
+        avatarUrl: avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop',
         createdAt: new Date().toISOString()
       };
       if (!db.feedbacks) db.feedbacks = [];

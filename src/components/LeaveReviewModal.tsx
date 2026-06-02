@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Star, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { usePatientAuth } from '../context/PatientAuthContext';
 
 interface LeaveReviewModalProps {
   isOpen: boolean;
@@ -8,9 +9,11 @@ interface LeaveReviewModalProps {
 }
 
 export default function LeaveReviewModal({ isOpen, onClose }: LeaveReviewModalProps) {
+  const { patient } = usePatientAuth();
+  
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState(patient?.name || '');
   const [treatment, setTreatment] = useState('General Consultation');
   const [quote, setQuote] = useState('');
   
@@ -47,7 +50,8 @@ export default function LeaveReviewModal({ isOpen, onClose }: LeaveReviewModalPr
           author,
           rating,
           treatmentRecieved: treatment,
-          quote
+          quote,
+          avatarUrl: patient?.profilePic || undefined
         })
       });
       
@@ -60,7 +64,7 @@ export default function LeaveReviewModal({ isOpen, onClose }: LeaveReviewModalPr
           setTimeout(() => {
             setSuccess(false);
             setRating(5);
-            setAuthor('');
+            setAuthor(patient?.name || '');
             setQuote('');
             setTreatment('General Consultation');
           }, 500);
