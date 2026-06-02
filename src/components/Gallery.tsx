@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Eye, X, ZoomIn } from 'lucide-react';
+import { useSocket } from '../context/SocketContext';
 
 // Import our high-quality generated assets
 import receptionImg from '../assets/images/clinic_reception_futuristic_1779863214963.png';
@@ -8,8 +9,9 @@ import treatmentImg from '../assets/images/clinic_treatment_room_advanced_177986
 
 export default function Gallery() {
   const [activeImage, setActiveImage] = useState<string | null>(null);
+  const { socket } = useSocket();
 
-  const galleryItems = [
+  const [galleryItems, setGalleryItems] = useState<any[]>([
     {
       id: 'gallery-reception',
       title: 'Minimalist Reception Sphere',
@@ -52,7 +54,27 @@ export default function Gallery() {
       imageUrl: 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=600&auto=format&fit=crop',
       spanClasses: 'md:col-span-1 md:row-span-1'
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const res = await fetch('/api/admin/gallery');
+        const json = await res.json();
+        if (json.success && json.data.length > 0) {
+          setGalleryItems(json.data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchGallery();
+
+    if (socket) {
+      socket.on('gallery_update', fetchGallery);
+      return () => { socket.off('gallery_update', fetchGallery); };
+    }
+  }, [socket]);
 
   return (
     <section id="gallery" className="py-24 relative bg-[#F8FAFC] dark:bg-[#0a0a1a] transition-colors duration-500">

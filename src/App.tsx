@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { PatientAuthProvider } from './context/PatientAuthContext';
+import { SocketProvider } from './context/SocketContext';
 import Home from './pages/Home';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -24,7 +25,8 @@ export default function App() {
     <ThemeProvider>
       <AuthProvider>
         <PatientAuthProvider>
-          <div className="relative overflow-x-hidden min-h-screen selection:bg-cyan-500 selection:text-white bg-[#f8fafc] dark:bg-[#0a0a1a] transition-colors duration-500">
+          <SocketProvider>
+            <div className="relative overflow-x-hidden min-h-screen selection:bg-cyan-500 selection:text-white bg-[#f8fafc] dark:bg-[#0a0a1a] transition-colors duration-500">
             <BrowserRouter>
               <Routes>
                 {/* Public Website */}
@@ -54,6 +56,7 @@ export default function App() {
               </Routes>
             </BrowserRouter>
           </div>
+          </SocketProvider>
         </PatientAuthProvider>
       </AuthProvider>
     </ThemeProvider>

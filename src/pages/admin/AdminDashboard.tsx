@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   LogOut, 
@@ -25,13 +26,16 @@ import { Appointment, Inquiry } from '../../types';
 
 export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs' | 'feedbacks' | 'services' | 'settings'>('appointments');
+  const { socket } = useSocket();
+  const [activeTab, setActiveTab] = useState<'appointments' | 'inquiries' | 'admins' | 'blogs' | 'feedbacks' | 'services' | 'gallery' | 'doctors' | 'settings'>('appointments');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
   const [blogs, setBlogs] = useState<any[]>([]);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
+  const [gallery, setGallery] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
   const [settingsData, setSettingsData] = useState({ priorityPrice: 1000, emergencyPrice: 3500 });
   const [loading, setLoading] = useState(true);
 
@@ -62,7 +66,26 @@ export default function AdminDashboard() {
   const [priorityPriceInput, setPriorityPriceInput] = useState('');
   const [emergencyPriceInput, setEmergencyPriceInput] = useState('');
   const [formFieldsSettings, setFormFieldsSettings] = useState({ requirePhone: true, requireDate: true, requireMessage: true });
+  const [heroStatsInput, setHeroStatsInput] = useState({ yearsOfCare: 20, smilesDesigned: 12, successRate: 98 });
   const [settingsLoading, setSettingsLoading] = useState(false);
+
+  // Gallery form state
+  const [newGalleryTitle, setNewGalleryTitle] = useState('');
+  const [newGalleryCategory, setNewGalleryCategory] = useState('');
+  const [newGalleryImage, setNewGalleryImage] = useState('');
+  const [newGallerySpan, setNewGallerySpan] = useState('md:col-span-1 md:row-span-1');
+  const [galleryActionLoading, setGalleryActionLoading] = useState(false);
+
+  // Doctor form state
+  const [newDoctorName, setNewDoctorName] = useState('');
+  const [newDoctorRole, setNewDoctorRole] = useState('');
+  const [newDoctorExperience, setNewDoctorExperience] = useState('');
+  const [newDoctorImage, setNewDoctorImage] = useState('');
+  const [newDoctorSpecialty, setNewDoctorSpecialty] = useState('');
+  const [newDoctorEducation, setNewDoctorEducation] = useState('');
+  const [newDoctorBio, setNewDoctorBio] = useState('');
+  const [newDoctorDays, setNewDoctorDays] = useState('Mon,Tue,Wed');
+  const [doctorActionLoading, setDoctorActionLoading] = useState(false);
 
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
@@ -78,6 +101,40 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchData();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleUpdate = () => {
+      fetchData();
+    };
+
+    socket.on('new_appointment', handleUpdate);
+    socket.on('update_appointment', handleUpdate);
+    socket.on('delete_appointment', handleUpdate);
+    socket.on('new_inquiry', handleUpdate);
+    socket.on('delete_inquiry', handleUpdate);
+    socket.on('blog_update', handleUpdate);
+    socket.on('feedback_update', handleUpdate);
+    socket.on('services_update', handleUpdate);
+    socket.on('settings_update', handleUpdate);
+    socket.on('gallery_update', handleUpdate);
+    socket.on('doctors_update', handleUpdate);
+
+    return () => {
+      socket.off('new_appointment', handleUpdate);
+      socket.off('update_appointment', handleUpdate);
+      socket.off('delete_appointment', handleUpdate);
+      socket.off('new_inquiry', handleUpdate);
+      socket.off('delete_inquiry', handleUpdate);
+      socket.off('blog_update', handleUpdate);
+      socket.off('feedback_update', handleUpdate);
+      socket.off('services_update', handleUpdate);
+      socket.off('settings_update', handleUpdate);
+      socket.off('gallery_update', handleUpdate);
+      socket.off('doctors_update', handleUpdate);
+    };
+  }, [socket, activeTab, token]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -123,6 +180,14 @@ export default function AdminDashboard() {
         const res = await fetch('/api/services');
         const json = await res.json();
         if (json.success) setServices(json.data);
+      } else if (activeTab === 'gallery') {
+        const res = await fetch('/api/admin/gallery');
+        const json = await res.json();
+        if (json.success) setGallery(json.data);
+      } else if (activeTab === 'doctors') {
+        const res = await fetch('/api/admin/doctors');
+        const json = await res.json();
+        if (json.success) setDoctors(json.data);
       } else if (activeTab === 'settings') {
         const res = await fetch('/api/settings');
         const json = await res.json();
@@ -132,6 +197,9 @@ export default function AdminDashboard() {
           setEmergencyPriceInput(json.data.emergencyPrice.toString());
           if (json.data.formFields) {
             setFormFieldsSettings(json.data.formFields);
+          }
+          if (json.data.heroStats) {
+            setHeroStatsInput(json.data.heroStats);
           }
         }
       }
@@ -410,6 +478,78 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateHeroStats = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    try {
+      const res = await fetch('/api/settings/hero-stats', {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify({ heroStats: heroStatsInput })
+      });
+      if (res.ok) alert('Hero stats updated successfully!');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleCreateGallery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setGalleryActionLoading(true);
+    try {
+      const payload = { title: newGalleryTitle, category: newGalleryCategory, imageUrl: newGalleryImage, spanClasses: newGallerySpan };
+      const res = await fetch('/api/admin/gallery', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewGalleryTitle(''); setNewGalleryCategory(''); setNewGalleryImage(''); setNewGallerySpan('md:col-span-1 md:row-span-1');
+        fetchData();
+      }
+    } catch (err) { console.error(err); } finally { setGalleryActionLoading(false); }
+  };
+
+  const handleDeleteGallery = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/gallery/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setGallery(prev => prev.filter(g => g.id !== id));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleCreateDoctor = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setDoctorActionLoading(true);
+    try {
+      const payload = { 
+        name: newDoctorName, role: newDoctorRole, experience: newDoctorExperience, imageURL: newDoctorImage, 
+        specialty: newDoctorSpecialty, education: newDoctorEducation, bio: newDoctorBio, daysAvailable: newDoctorDays.split(',').map(d => d.trim()) 
+      };
+      const res = await fetch('/api/admin/doctors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setNewDoctorName(''); setNewDoctorRole(''); setNewDoctorExperience(''); setNewDoctorImage(''); 
+        setNewDoctorSpecialty(''); setNewDoctorEducation(''); setNewDoctorBio(''); setNewDoctorDays('Mon,Tue,Wed');
+        fetchData();
+      }
+    } catch (err) { console.error(err); } finally { setDoctorActionLoading(false); }
+  };
+
+  const handleDeleteDoctor = async (id: string) => {
+    try {
+      const res = await fetch(`/api/admin/doctors/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setDoctors(prev => prev.filter(d => d.id !== id));
+    } catch (err) { console.error(err); }
+  };
+
   const handleDeleteAppointment = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
@@ -576,6 +716,30 @@ export default function AdminDashboard() {
           >
             <ClipboardList className="w-4 h-4" />
             Manage Services
+          </button>
+
+          <button
+            onClick={() => setActiveTab('gallery')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'gallery'
+                ? 'bg-pink-50 dark:bg-pink-500/10 text-pink-600 dark:text-pink-400'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <ImageIcon className="w-4 h-4" />
+            Manage Gallery
+          </button>
+
+          <button
+            onClick={() => setActiveTab('doctors')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+              activeTab === 'doctors'
+                ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            Manage Doctors
           </button>
 
           <button
@@ -1143,6 +1307,111 @@ export default function AdminDashboard() {
                       {settingsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Pricing Configuration'}
                     </button>
                   </div>
+                </div>
+
+                {/* Hero Stats Config */}
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden mt-8">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center gap-3">
+                    <Star className="w-5 h-5 text-slate-700 dark:text-white" />
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Hero Statistics</h3>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Years of Care</label>
+                        <input type="number" value={heroStatsInput.yearsOfCare} onChange={e => setHeroStatsInput({...heroStatsInput, yearsOfCare: Number(e.target.value)})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-purple-500 dark:text-white" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Smiles Designed (k)</label>
+                        <input type="number" value={heroStatsInput.smilesDesigned} onChange={e => setHeroStatsInput({...heroStatsInput, smilesDesigned: Number(e.target.value)})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-purple-500 dark:text-white" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Success Rate (%)</label>
+                        <input type="number" value={heroStatsInput.successRate} onChange={e => setHeroStatsInput({...heroStatsInput, successRate: Number(e.target.value)})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-purple-500 dark:text-white" />
+                      </div>
+                    </div>
+                    <button onClick={handleUpdateHeroStats} disabled={settingsLoading} className="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors mt-6">
+                      {settingsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Hero Stats'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Manage Gallery View */}
+            {activeTab === 'gallery' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden h-fit">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Gallery Images</h3>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
+                    {gallery.length === 0 && <p className="p-6 text-slate-500 text-sm">No gallery items configured.</p>}
+                    {gallery.map(item => (
+                      <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <img src={item.imageUrl} alt={item.title} className="w-16 h-16 rounded object-cover" />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.title}</h4>
+                          <p className="text-xs text-slate-500 mb-2">{item.category} • {item.spanClasses}</p>
+                          <button onClick={() => handleDeleteGallery(item.id)} className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add Gallery Image</h3>
+                  <form onSubmit={handleCreateGallery} className="space-y-4">
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Title</label><input type="text" required value={newGalleryTitle} onChange={e => setNewGalleryTitle(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category</label><input type="text" required value={newGalleryCategory} onChange={e => setNewGalleryCategory(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label><input type="text" required value={newGalleryImage} onChange={e => setNewGalleryImage(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Grid Span Classes (Tailwind)</label><input type="text" value={newGallerySpan} onChange={e => setNewGallerySpan(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-pink-500 dark:text-white text-sm" placeholder="md:col-span-1 md:row-span-1" /></div>
+                    <button disabled={galleryActionLoading} type="submit" className="w-full py-3 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">{galleryActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Image'}</button>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Manage Doctors View */}
+            {activeTab === 'doctors' && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden h-fit">
+                  <div className="p-6 border-b border-slate-100 dark:border-white/5">
+                    <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Doctors</h3>
+                  </div>
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
+                    {doctors.length === 0 && <p className="p-6 text-slate-500 text-sm">No doctors configured.</p>}
+                    {doctors.map(item => (
+                      <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
+                        <img src={item.imageURL} alt={item.name} className="w-16 h-16 rounded object-cover" />
+                        <div className="flex-1">
+                          <h4 className="font-bold text-slate-900 dark:text-white mb-1">{item.name}</h4>
+                          <p className="text-xs text-slate-500 mb-2">{item.role} • {item.experience}</p>
+                          <button onClick={() => handleDeleteDoctor(item.id)} className="p-1.5 text-slate-400 hover:text-rose-500 rounded-lg transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm p-6">
+                  <h3 className="font-black font-display text-lg text-slate-900 dark:text-white mb-6">Add Doctor</h3>
+                  <form onSubmit={handleCreateDoctor} className="space-y-4">
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Name</label><input type="text" required value={newDoctorName} onChange={e => setNewDoctorName(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Role</label><input type="text" required value={newDoctorRole} onChange={e => setNewDoctorRole(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Experience</label><input type="text" required value={newDoctorExperience} onChange={e => setNewDoctorExperience(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Image URL</label><input type="text" required value={newDoctorImage} onChange={e => setNewDoctorImage(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Specialty</label><input type="text" required value={newDoctorSpecialty} onChange={e => setNewDoctorSpecialty(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Education</label><input type="text" required value={newDoctorEducation} onChange={e => setNewDoctorEducation(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Days Available (Comma sep)</label><input type="text" required value={newDoctorDays} onChange={e => setNewDoctorDays(e.target.value)} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm" /></div>
+                    <div><label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Bio</label><textarea required value={newDoctorBio} onChange={e => setNewDoctorBio(e.target.value)} className="w-full h-20 px-4 py-2.5 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl focus:outline-none focus:border-indigo-500 dark:text-white text-sm resize-none"></textarea></div>
+                    <button disabled={doctorActionLoading} type="submit" className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 disabled:opacity-50 transition-colors">{doctorActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Add Doctor'}</button>
+                  </form>
                 </div>
               </div>
             )}

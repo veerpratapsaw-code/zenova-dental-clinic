@@ -1,5 +1,6 @@
 import express from 'express';
 import { getFallbackDb, saveFallbackDb, getDbStatus } from '../config/db';
+import { getIO } from '../socket';
 
 const router = express.Router();
 
@@ -49,6 +50,7 @@ router.post('/', async (req, res) => {
         ...(avatarUrl && { avatarUrl })
       });
       await feedback.save();
+      getIO().emit('feedback_update');
       res.status(201).json({ success: true, data: feedback });
     } else {
       const db = getFallbackDb();
@@ -65,6 +67,7 @@ router.post('/', async (req, res) => {
       if (!db.feedbacks) db.feedbacks = [];
       db.feedbacks.push(newFeedback);
       saveFallbackDb(db);
+      getIO().emit('feedback_update');
       res.status(201).json({ success: true, data: newFeedback });
     }
   } catch (error) {

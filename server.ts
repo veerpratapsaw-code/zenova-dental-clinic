@@ -9,7 +9,8 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 // import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
-
+import http from 'http';
+import { initSocket } from './server/socket';
 // Internal backend imports
 import { connectDB } from './server/config/db';
 import appointmentRoutes from './server/routes/appointmentRoutes';
@@ -20,6 +21,8 @@ import chatRoutes from './server/routes/chatRoutes';
 import patientAuthRoutes from './server/routes/patientAuthRoutes';
 import blogRoutes from './server/routes/blogRoutes';
 import feedbackRoutes from './server/routes/feedbackRoutes';
+import doctorRoutes from './server/routes/doctorRoutes';
+import galleryRoutes from './server/routes/galleryRoutes';
 
 // Resolve directory names for ES module scope (Removed due to CJS build crash, unused)
 // const __filename = fileURLToPath(import.meta.url);
@@ -69,6 +72,8 @@ app.use('/api/feedback', feedbackRoutes);
 // Auth and Admin Dashboard routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/doctors', doctorRoutes);
+app.use('/api/admin/gallery', galleryRoutes);
 app.use('/api/patient', patientAuthRoutes);
 
 import { getDbStatus, getFallbackDb } from './server/config/db';
@@ -92,6 +97,37 @@ app.get('/api/settings', async (req, res) => {
     res.status(200).json({ success: true, data });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error fetching settings' });
+  }
+});
+
+app.put('/api/settings/hero-stats', async (req, res) => {
+  try {
+    const { heroStats } = req.body;
+    const { mode } = getDbStatus();
+    
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('./server/models/Settings');
+      let settings = await Settings.findOne();
+      if (!settings) {
+        settings = await Settings.create({ priorityPrice: 1000, emergencyPrice: 3500, heroStats });
+      } else {
+        settings.heroStats = heroStats;
+        await settings.save();
+      }
+    } else {
+      const db = getFallbackDb();
+      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500 };
+      db.settings.heroStats = heroStats;
+      const { saveFallbackDb } = await import('./server/config/db');
+      saveFallbackDb(db);
+    }
+    
+    const { getIO } = await import('./server/socket');
+    getIO().emit('settings_update');
+    
+    res.status(200).json({ success: true, message: 'Hero stats updated' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error updating hero stats' });
   }
 });
 
@@ -261,6 +297,9 @@ async function startServer() {
   // First, fire MongoDB database connector (operates with runtime file fallbacks if absent)
   await connectDB();
 
+  const httpServer = http.createServer(app);
+  initSocket(httpServer);
+
   // If in Development environment, mount Vite middleware to parse React SPA code live
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
@@ -280,7 +319,7 @@ async function startServer() {
   }
 
   // Bind server container to port 3000 to coordinate with Cloud ingress routing
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log('\n=============================================================');
     console.log(`🚀 ZENOVA CLINICS SECURE ENGINE BOOTED & RUNNING SUCCESSFULLY!`);
     console.log(`👉 Primary Endpoint: http://localhost:${PORT}`);

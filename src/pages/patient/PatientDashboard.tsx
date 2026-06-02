@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { usePatientAuth } from '../../context/PatientAuthContext';
+import { useSocket } from '../../context/SocketContext';
 import { Activity, LogOut, Calendar, Clock, CheckCircle2, XCircle, ChevronRight, MapPin, User as UserIcon, Camera, Save, Loader2 } from 'lucide-react';
 
 interface Appointment {
@@ -15,6 +16,7 @@ interface Appointment {
 
 export default function PatientDashboard() {
   const { patient, token, loginPatient, updatePatient, logoutPatient, isLoading: authLoading } = usePatientAuth();
+  const { socket } = useSocket();
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,28 +51,41 @@ export default function PatientDashboard() {
     }
   }, [patient, authLoading, navigate]);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      if (!token) return;
-      try {
-        const res = await fetch('/api/patient/appointments', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (data.success) {
-          setAppointments(data.data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch appointments');
-      } finally {
-        setLoading(false);
+  const fetchAppointments = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/patient/appointments', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAppointments(data.data);
       }
-    };
+    } catch (error) {
+      console.error('Failed to fetch appointments');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (token) {
       fetchAppointments();
     }
   }, [token]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleUpdate = () => {
+      if (token) fetchAppointments();
+    };
+    socket.on('update_appointment', handleUpdate);
+    socket.on('delete_appointment', handleUpdate);
+    return () => {
+      socket.off('update_appointment', handleUpdate);
+      socket.off('delete_appointment', handleUpdate);
+    };
+  }, [socket, token]);
 
   const handleLogout = () => {
     logoutPatient();

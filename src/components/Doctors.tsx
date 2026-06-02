@@ -1,14 +1,16 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Mail, CalendarRange, Sparkles, Award, ShieldCheck, GraduationCap } from 'lucide-react';
 import { Doctor } from '../types';
+import { useSocket } from '../context/SocketContext';
 
 interface DoctorsProps {
   onDoctorConsult: (doctorName: string) => void;
 }
 
 export default function Doctors({ onDoctorConsult }: DoctorsProps) {
-  
-  const specialists: Doctor[] = [
+  const { socket } = useSocket();
+  const [specialists, setSpecialists] = useState<Doctor[]>([
     {
       id: 'doc-arvind',
       name: 'Dr. Arvind Sharma',
@@ -20,7 +22,27 @@ export default function Doctors({ onDoctorConsult }: DoctorsProps) {
       bio: 'Arvind pioneered low-heat computer-guided drilling techniques to optimize biological bone merging during crown anchors.',
       daysAvailable: ['Mon', 'Tue', 'Thu', 'Fri']
     }
-  ];
+  ]);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch('/api/admin/doctors');
+        const json = await res.json();
+        if (json.success && json.data.length > 0) {
+          setSpecialists(json.data);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchDoctors();
+
+    if (socket) {
+      socket.on('doctors_update', fetchDoctors);
+      return () => { socket.off('doctors_update', fetchDoctors); };
+    }
+  }, [socket]);
 
   return (
     <section id="doctors" className="py-24 relative overflow-hidden bg-[#F8FAFC] dark:bg-[#0a0a1a] transition-colors duration-500">

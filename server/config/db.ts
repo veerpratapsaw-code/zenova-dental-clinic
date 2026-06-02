@@ -70,6 +70,26 @@ export interface FallbackDatabase {
   feedbacks?: any[];
   services?: any[];
   settings?: any;
+  gallery?: Array<{
+    id: string;
+    title: string;
+    category: string;
+    imageUrl: string;
+    spanClasses: string;
+    createdAt: string;
+  }>;
+  doctors?: Array<{
+    id: string;
+    name: string;
+    role: string;
+    experience: string;
+    imageURL: string;
+    specialty: string;
+    education: string;
+    bio: string;
+    daysAvailable: string[];
+    createdAt: string;
+  }>;
 }
 
 // Low-overhead JSON Database Initializer/Reader
@@ -86,7 +106,14 @@ export const getFallbackDb = (): FallbackDatabase => {
         blogs: parsed.blogs || [],
         feedbacks: parsed.feedbacks || [],
         services: parsed.services || [],
-        settings: parsed.settings || { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } }
+        settings: parsed.settings || { 
+          priorityPrice: 1000, 
+          emergencyPrice: 3500, 
+          formFields: { requirePhone: true, requireDate: true, requireMessage: true },
+          heroStats: { yearsOfCare: 20, smilesDesigned: 12, successRate: 98 }
+        },
+        gallery: parsed.gallery || [],
+        doctors: parsed.doctors || []
       };
     }
   } catch (error) {
@@ -102,7 +129,14 @@ export const getFallbackDb = (): FallbackDatabase => {
     blogs: [], 
     feedbacks: [],
     services: [],
-    settings: { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } }
+    settings: { 
+      priorityPrice: 1000, 
+      emergencyPrice: 3500, 
+      formFields: { requirePhone: true, requireDate: true, requireMessage: true },
+      heroStats: { yearsOfCare: 20, smilesDesigned: 12, successRate: 98 }
+    },
+    gallery: [],
+    doctors: []
   };
 };
 

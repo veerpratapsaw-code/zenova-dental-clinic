@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Calendar, ArrowRight, Star, ShieldCheck, Award, Sparkles, Plus, Activity } from 'lucide-react';
 import { motion, useMotionValue, useSpring, useTransform, useScroll } from 'motion/react';
+import { useSocket } from '../context/SocketContext';
 import CountUp from './CountUp';
 import jaw3DImage from '../assets/images/single_tooth.png';
 
@@ -13,6 +14,28 @@ export default function Hero({ onBookClick, onExploreClick }: HeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(true);
   const [processedImage, setProcessedImage] = useState<string>('');
+  const { socket } = useSocket();
+  const [stats, setStats] = useState({ yearsOfCare: 20, smilesDesigned: 12, successRate: 98 });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        const json = await res.json();
+        if (json.success && json.data.heroStats) {
+          setStats(json.data.heroStats);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchStats();
+
+    if (socket) {
+      socket.on('settings_update', fetchStats);
+      return () => { socket.off('settings_update', fetchStats); };
+    }
+  }, [socket]);
 
   // Check hover capability to disable tilt on mobile touchscreens
   useEffect(() => {
@@ -365,9 +388,9 @@ export default function Hero({ onBookClick, onExploreClick }: HeroProps) {
           {/* Clean clinical metrics row with CountUp animation */}
           <div className="grid grid-cols-3 gap-4 sm:gap-6 w-full pt-8 mt-5 border-t border-slate-200/60 dark:border-white/10 justify-items-center">
             {[
-              { id: 'm-1', val: 20, suffix: '+', label: 'Years of Care', icon: Award, color: 'text-violet-600 dark:text-violet-400' },
-              { id: 'm-2', val: 12, suffix: 'k+', label: 'Smiles Designed', icon: Star, color: 'text-cyan-500 dark:text-cyan-400' },
-              { id: 'm-3', val: 98, suffix: '%', label: 'Success Rate', icon: ShieldCheck, color: 'text-emerald-500 dark:text-emerald-400' }
+              { id: 'm-1', val: stats.yearsOfCare, suffix: '+', label: 'Years of Care', icon: Award, color: 'text-violet-600 dark:text-violet-400' },
+              { id: 'm-2', val: stats.smilesDesigned, suffix: 'k+', label: 'Smiles Designed', icon: Star, color: 'text-cyan-500 dark:text-cyan-400' },
+              { id: 'm-3', val: stats.successRate, suffix: '%', label: 'Success Rate', icon: ShieldCheck, color: 'text-emerald-500 dark:text-emerald-400' }
             ].map((stat, i) => (
               <motion.div
                 key={stat.id}

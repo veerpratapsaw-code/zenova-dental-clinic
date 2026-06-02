@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { AppointmentModel } from '../models/Appointment';
 import { getDbStatus, getFallbackDb, saveFallbackDb } from '../config/db';
 import { sendEmailNotification } from '../config/notifications';
+import { getIO } from '../socket';
 
 /**
  * Handle creation of a new medical appointment
@@ -66,6 +67,9 @@ export const createAppointment = async (req: Request, res: Response) => {
       saveFallbackDb(localDb);
       appointmentData = newLocalApp;
     }
+
+    // Emit realtime event
+    getIO().emit('new_appointment', appointmentData);
 
     // Return polished successful responses
     return res.status(201).json({

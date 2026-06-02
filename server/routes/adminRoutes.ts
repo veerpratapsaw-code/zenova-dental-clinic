@@ -3,6 +3,7 @@ import { requireAuth } from '../middleware/authMiddleware';
 import { getFallbackDb, saveFallbackDb, getDbStatus } from '../config/db';
 import { sendStatusUpdateEmail } from '../config/notifications';
 import { AppointmentModel as Appointment } from '../models/Appointment';
+import { getIO } from '../socket';
 
 const router = express.Router();
 
@@ -61,6 +62,7 @@ router.put('/appointments/:id', requireAuth, async (req, res) => {
       );
       if (!apt) return res.status(404).json({ success: false, message: 'Not found' });
       await sendStatusUpdateEmail(apt.email, apt.name, status, apt.preferredDate);
+      getIO().emit('update_appointment', apt);
       res.status(200).json({ success: true, data: apt });
     } else {
       const db = getFallbackDb();
@@ -72,6 +74,7 @@ router.put('/appointments/:id', requireAuth, async (req, res) => {
         saveFallbackDb(db);
         const apt = db.appointments[idx];
         await sendStatusUpdateEmail(apt.email, apt.name, status, apt.preferredDate);
+        getIO().emit('update_appointment', apt);
         res.status(200).json({ success: true, data: apt });
       } else {
         res.status(404).json({ success: false, message: 'Not found' });
@@ -89,6 +92,7 @@ router.delete('/appointments/:id', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       const apt = await Appointment.findByIdAndDelete(req.params.id);
       if (!apt) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('delete_appointment', req.params.id);
       res.status(200).json({ success: true, message: 'Deleted successfully' });
     } else {
       const db = getFallbackDb();
@@ -96,6 +100,7 @@ router.delete('/appointments/:id', requireAuth, async (req, res) => {
       if (idx !== undefined && idx !== -1 && db.appointments) {
         db.appointments.splice(idx, 1);
         saveFallbackDb(db);
+        getIO().emit('delete_appointment', req.params.id);
         res.status(200).json({ success: true, message: 'Deleted successfully' });
       } else {
         res.status(404).json({ success: false, message: 'Not found' });
@@ -192,6 +197,7 @@ router.delete('/inquiries/:id', requireAuth, async (req, res) => {
       const { ContactModel: Contact } = await import('../models/Contact');
       const contact = await Contact.findByIdAndDelete(req.params.id);
       if (!contact) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('delete_inquiry', req.params.id);
       res.status(200).json({ success: true, message: 'Deleted successfully' });
     } else {
       const db = getFallbackDb();
@@ -199,6 +205,7 @@ router.delete('/inquiries/:id', requireAuth, async (req, res) => {
       if (idx !== undefined && idx !== -1 && db.inquiries) {
         db.inquiries.splice(idx, 1);
         saveFallbackDb(db);
+        getIO().emit('delete_inquiry', req.params.id);
         res.status(200).json({ success: true, message: 'Deleted successfully' });
       } else {
         res.status(404).json({ success: false, message: 'Not found' });
@@ -325,6 +332,7 @@ router.post('/blogs', requireAuth, async (req, res) => {
       const { BlogModel: Blog } = await import('../models/Blog');
       const blog = new Blog({ title, slug, excerpt, content, category, readTime, imageUrl: finalImageUrl, author, date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) });
       await blog.save();
+      getIO().emit('blog_update');
       res.status(201).json({ success: true, data: blog });
     } else {
       const db = getFallbackDb();
@@ -337,6 +345,7 @@ router.post('/blogs', requireAuth, async (req, res) => {
       if (!db.blogs) db.blogs = [];
       db.blogs.push(newBlog);
       saveFallbackDb(db);
+      getIO().emit('blog_update');
       res.status(201).json({ success: true, data: newBlog });
     }
   } catch (error) {
@@ -352,6 +361,7 @@ router.delete('/blogs/:id', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       const { BlogModel: Blog } = await import('../models/Blog');
       await Blog.findByIdAndDelete(req.params.id);
+      getIO().emit('blog_update');
       res.status(200).json({ success: true });
     } else {
       const db = getFallbackDb();
@@ -359,6 +369,7 @@ router.delete('/blogs/:id', requireAuth, async (req, res) => {
         db.blogs = db.blogs.filter(b => b.id !== req.params.id);
         saveFallbackDb(db);
       }
+      getIO().emit('blog_update');
       res.status(200).json({ success: true });
     }
   } catch (error) {
@@ -398,6 +409,7 @@ router.put('/feedbacks/:id/approve', requireAuth, async (req, res) => {
       const { FeedbackModel: Feedback } = await import('../models/Feedback');
       const feedback = await Feedback.findByIdAndUpdate(req.params.id, { isApproved }, { new: true });
       if (!feedback) return res.status(404).json({ success: false, message: 'Not found' });
+      getIO().emit('feedback_update');
       res.status(200).json({ success: true, data: feedback });
     } else {
       const db = getFallbackDb();
@@ -405,6 +417,7 @@ router.put('/feedbacks/:id/approve', requireAuth, async (req, res) => {
       if (idx !== undefined && idx !== -1 && db.feedbacks) {
         db.feedbacks[idx].isApproved = isApproved;
         saveFallbackDb(db);
+        getIO().emit('feedback_update');
         res.status(200).json({ success: true, data: db.feedbacks[idx] });
       } else {
         res.status(404).json({ success: false, message: 'Not found' });
@@ -422,6 +435,7 @@ router.delete('/feedbacks/:id', requireAuth, async (req, res) => {
     if (mode === 'mongodb') {
       const { FeedbackModel: Feedback } = await import('../models/Feedback');
       await Feedback.findByIdAndDelete(req.params.id);
+      getIO().emit('feedback_update');
       res.status(200).json({ success: true });
     } else {
       const db = getFallbackDb();
@@ -429,6 +443,7 @@ router.delete('/feedbacks/:id', requireAuth, async (req, res) => {
         db.feedbacks = db.feedbacks.filter(f => f.id !== req.params.id);
         saveFallbackDb(db);
       }
+      getIO().emit('feedback_update');
       res.status(200).json({ success: true });
     }
   } catch (error) {

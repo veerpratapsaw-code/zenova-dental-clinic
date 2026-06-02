@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ContactModel } from '../models/Contact';
 import { getDbStatus, getFallbackDb, saveFallbackDb } from '../config/db';
+import { getIO } from '../socket';
 
 /**
  * Log general medical contact inquiry
@@ -44,6 +45,8 @@ export const createContactInquiry = async (req: Request, res: Response) => {
       saveFallbackDb(localDb);
       inquiryData = newLocalInquiry;
     }
+
+    getIO().emit('new_inquiry', inquiryData);
 
     // Interactive developer console report for contacts
     console.log(`\n=============================================================`);
