@@ -266,6 +266,15 @@ export default function PatientDashboard() {
                       </div>
 
                       {/* Advanced Scheduling Details Section */}
+                      {(apt.status === 'confirmed' || apt.status === 'pending') && typeof apt.queuePosition === 'number' && (
+                        <div className="bg-indigo-50 dark:bg-indigo-500/10 rounded-xl p-3 mb-3 border border-indigo-100 dark:border-indigo-500/20 flex items-center gap-2">
+                          <UserIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                          <span className="text-sm font-bold text-indigo-800 dark:text-indigo-300">
+                            Live Queue: {apt.queuePosition === 1 ? 'You are next!' : `${apt.queuePosition - 1} people ahead of you.`}
+                          </span>
+                        </div>
+                      )}
+
                       {apt.status === 'confirmed' ? (
                         <div className="bg-cyan-50 dark:bg-cyan-500/10 rounded-xl p-4 border border-cyan-100 dark:border-cyan-500/20">
                           <div className="flex items-center gap-2 mb-2">

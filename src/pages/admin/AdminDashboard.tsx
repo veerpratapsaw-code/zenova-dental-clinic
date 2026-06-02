@@ -986,92 +986,109 @@ export default function AdminDashboard() {
           <div className="space-y-6">
             
             {/* Appointments View */}
-            {activeTab === 'appointments' && (
-              <div className="bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200 dark:border-white/10">
-                        <th className="p-4 pl-6">Patient</th>
-                        <th className="p-4">Contact</th>
-                        <th className="p-4">Treatment</th>
-                        <th className="p-4">Date</th>
-                        <th className="p-4">Status</th>
-                        <th className="p-4 pr-6">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-                      {appointments.length === 0 && (
-                        <tr><td colSpan={6} className="p-8 text-center text-slate-500">No appointments found.</td></tr>
-                      )}
-                      {appointments.map((apt) => (
-                        <tr key={apt.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
-                          <td className="p-4 pl-6">
-                            <div className="font-bold text-slate-900 dark:text-white">{apt.name}</div>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              <span className="text-[10px] font-mono text-slate-400">ID: {apt.id.split('-')[1] || apt.id}</span>
-                              <span className="flex items-center gap-1 text-[10px] text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
-                                <Clock className="w-3 h-3" />
-                                {new Date(apt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                            </div>
-                            {apt.priorityLevel === 'emergency' && (
-                              <div className="mt-1.5"><span className="px-2 py-0.5 rounded bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400 text-[9px] font-black uppercase tracking-widest border border-red-200 dark:border-red-500/20">Emergency</span></div>
-                            )}
-                            {apt.priorityLevel === 'priority' && (
-                              <div className="mt-1.5"><span className="px-2 py-0.5 rounded bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400 text-[9px] font-black uppercase tracking-widest border border-purple-200 dark:border-purple-500/20">Priority Skipped</span></div>
-                            )}
-                          </td>
-                          <td className="p-4 text-sm text-slate-600 dark:text-slate-300">
-                            <div>{apt.phone}</div>
-                            <div className="text-xs text-slate-400">{apt.email}</div>
-                          </td>
-                          <td className="p-4">
-                            <div className="text-sm font-semibold text-purple-600 dark:text-purple-400">{apt.treatmentType}</div>
-                            {apt.adminNotes && <div className="text-[10px] text-slate-400 mt-1 max-w-[150px] truncate" title={apt.adminNotes}>Note: {apt.adminNotes}</div>}
-                          </td>
-                          <td className="p-4 text-sm font-mono text-slate-700 dark:text-slate-300">
-                            <div>{apt.preferredDate}</div>
-                            {apt.assignedTime && <div className="text-xs text-emerald-500 font-bold mt-0.5">{apt.assignedTime}</div>}
-                          </td>
-                          <td className="p-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
-                              apt.status === 'confirmed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' :
-                              apt.status === 'pending' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400' :
-                              'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
-                            }`}>
-                              {apt.status === 'pending' && <Clock className="w-3 h-3" />}
-                              {apt.status === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
-                              {apt.status === 'cancelled' && <XCircle className="w-3 h-3" />}
-                              {apt.status}
-                            </span>
-                          </td>
-                          <td className="p-4 pr-6">
-                            {apt.status === 'pending' && (
-                              <div className="flex items-center gap-2 mb-2">
-                                <button onClick={() => {
-                                  setConfirmModalApt(apt);
-                                  setAssignedTime('');
-                                  setAdminNotes('');
-                                }} className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 transition-colors" title="Confirm">
-                                  <CheckCircle2 className="w-4 h-4" />
-                                </button>
-                                <button onClick={() => updateAppointmentStatus(apt.id, 'cancelled')} className="p-1.5 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:hover:bg-rose-500/30 transition-colors" title="Cancel">
-                                  <XCircle className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                            <button onClick={() => handleDeleteAppointment(apt.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors" title="Delete">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </td>
+            {activeTab === 'appointments' && (() => {
+              const sortQueue = (arr: any[]) => arr.sort((a, b) => {
+                if (b.preferredDate !== a.preferredDate) return b.preferredDate.localeCompare(a.preferredDate);
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+              });
+
+              const emergencyApts = sortQueue(appointments.filter(a => a.priorityLevel === 'emergency'));
+              const priorityApts = sortQueue(appointments.filter(a => a.priorityLevel === 'priority'));
+              const standardApts = sortQueue(appointments.filter(a => a.priorityLevel !== 'emergency' && a.priorityLevel !== 'priority'));
+
+              const renderTable = (title: string, apts: any[], borderColor: string, titleColor: string) => (
+                <div className={`bg-white dark:bg-[#0f0f23]/80 rounded-[24px] border ${borderColor} shadow-sm overflow-hidden mb-8`}>
+                  <div className={`px-6 py-4 border-b border-slate-200 dark:border-white/10 flex justify-between items-center`}>
+                    <h3 className={`text-lg font-black ${titleColor}`}>{title} ({apts.length})</h3>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-white/5 px-2 py-1 rounded-md">Next Patient at Bottom &darr;</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200 dark:border-white/10">
+                          <th className="p-4 pl-6">Patient</th>
+                          <th className="p-4">Contact</th>
+                          <th className="p-4">Treatment</th>
+                          <th className="p-4">Date</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 pr-6">Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                        {apts.length === 0 && (
+                          <tr><td colSpan={6} className="p-8 text-center text-slate-500">No appointments in this queue.</td></tr>
+                        )}
+                        {apts.map((apt) => (
+                          <tr key={apt.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                            <td className="p-4 pl-6">
+                              <div className="font-bold text-slate-900 dark:text-white">{apt.name}</div>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[10px] font-mono text-slate-400">ID: {apt.id.split('-')[1] || apt.id}</span>
+                                <span className="flex items-center gap-1 text-[10px] text-slate-400 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 rounded">
+                                  <Clock className="w-3 h-3" />
+                                  {new Date(apt.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="p-4 text-sm text-slate-600 dark:text-slate-300">
+                              <div>{apt.phone}</div>
+                              <div className="text-xs text-slate-400">{apt.email}</div>
+                            </td>
+                            <td className="p-4">
+                              <div className="text-sm font-semibold text-purple-600 dark:text-purple-400">{apt.treatmentType}</div>
+                              {apt.adminNotes && <div className="text-[10px] text-slate-400 mt-1 max-w-[150px] truncate" title={apt.adminNotes}>Note: {apt.adminNotes}</div>}
+                            </td>
+                            <td className="p-4 text-sm font-mono text-slate-700 dark:text-slate-300">
+                              <div>{apt.preferredDate}</div>
+                              {apt.assignedTime && <div className="text-xs text-emerald-500 font-bold mt-0.5">{apt.assignedTime}</div>}
+                            </td>
+                            <td className="p-4">
+                              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
+                                apt.status === 'confirmed' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400' :
+                                apt.status === 'pending' ? 'bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-500/10 dark:border-amber-500/20 dark:text-amber-400' :
+                                'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400'
+                              }`}>
+                                {apt.status === 'pending' && <Clock className="w-3 h-3" />}
+                                {apt.status === 'confirmed' && <CheckCircle2 className="w-3 h-3" />}
+                                {apt.status === 'cancelled' && <XCircle className="w-3 h-3" />}
+                                {apt.status}
+                              </span>
+                            </td>
+                            <td className="p-4 pr-6">
+                              {apt.status === 'pending' && (
+                                <div className="flex items-center gap-2 mb-2">
+                                  <button onClick={() => {
+                                    setConfirmModalApt(apt);
+                                    setAssignedTime('');
+                                    setAdminNotes('');
+                                  }} className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-400 dark:hover:bg-emerald-500/30 transition-colors" title="Confirm">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                  </button>
+                                  <button onClick={() => updateAppointmentStatus(apt.id, 'cancelled')} className="p-1.5 rounded-lg bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-500/20 dark:text-rose-400 dark:hover:bg-rose-500/30 transition-colors" title="Cancel">
+                                    <XCircle className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )}
+                              <button onClick={() => handleDeleteAppointment(apt.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors" title="Delete">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+
+              return (
+                <div className="space-y-4">
+                  {renderTable('Emergency Queue', emergencyApts, 'border-rose-200 dark:border-rose-500/20', 'text-rose-600 dark:text-rose-400')}
+                  {renderTable('Priority Skipped Queue', priorityApts, 'border-purple-200 dark:border-purple-500/20', 'text-purple-600 dark:text-purple-400')}
+                  {renderTable('Standard Queue', standardApts, 'border-blue-200 dark:border-blue-500/20', 'text-blue-600 dark:text-blue-400')}
+                </div>
+              );
+            })()}
 
             {/* Inquiries View */}
             {activeTab === 'inquiries' && (
