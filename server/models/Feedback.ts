@@ -8,6 +8,7 @@ export interface IFeedback extends Document {
   treatmentRecieved: string;
   isApproved: boolean;
   avatarUrl?: string;
+  order: number;
   createdAt: Date;
 }
 
@@ -45,6 +46,10 @@ const FeedbackSchema: Schema = new Schema(
     avatarUrl: {
       type: String,
       default: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop'
+    },
+    order: {
+      type: Number,
+      default: 0
     }
   },
   {

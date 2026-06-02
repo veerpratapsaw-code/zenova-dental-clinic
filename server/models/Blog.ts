@@ -15,6 +15,7 @@ export interface IBlog extends Document {
   category: string;
   readTime: string;
   imageUrl: string;
+  order: number;
   createdAt: Date;
 }
 
@@ -32,6 +33,7 @@ const BlogSchema: Schema = new Schema({
   category: { type: String, required: true },
   readTime: { type: String, required: true },
   imageUrl: { type: String, required: true },
+  order: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     let data;
     if (mode === 'mongodb') {
       const { DoctorModel: Doctor } = await import('../models/Doctor');
-      const docs = await Doctor.find();
+      const docs = await Doctor.find().sort({ order: 1 });
       data = docs.map((doc: any) => {
         const obj = doc.toJSON();
         obj.id = doc.id;
@@ -21,6 +21,7 @@ router.get('/', async (req, res) => {
     } else {
       const db = getFallbackDb();
       data = db.doctors || [];
+      data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     }
     res.status(200).json({ success: true, data });
   } catch (error) {

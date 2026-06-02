@@ -218,6 +218,7 @@ app.get('/api/services', async (req, res) => {
         saveFallbackDb(db);
       }
       data = db.services;
+      data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
     }
     
     res.status(200).json({

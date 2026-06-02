@@ -424,7 +424,7 @@ router.get('/feedbacks', requireAuth, async (req, res) => {
     let data;
     if (mode === 'mongodb') {
       const { FeedbackModel: Feedback } = await import('../models/Feedback');
-      const docs = await Feedback.find().sort({ createdAt: -1 });
+      const docs = await Feedback.find().sort({ order: 1, createdAt: -1 });
       data = docs.map((doc: any) => {
         const obj = doc.toJSON();
         obj.id = doc.id;
@@ -433,6 +433,7 @@ router.get('/feedbacks', requireAuth, async (req, res) => {
     } else {
       const db = getFallbackDb();
       data = db.feedbacks || [];
+      data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     res.status(200).json({ success: true, data });
   } catch (error) {
@@ -623,6 +624,61 @@ router.put('/services/:id', requireAuth, async (req, res) => {
     }
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error updating service' });
+  }
+});// Reorder items
+router.put('/reorder', requireAuth, async (req, res) => {
+  try {
+    const { type, items } = req.body;
+    // type: 'gallery' | 'doctors' | 'services' | 'blogs' | 'feedbacks'
+    // items: { id: string, order: number }[]
+    if (!type || !items || !Array.isArray(items)) {
+      return res.status(400).json({ success: false, message: 'Invalid payload' });
+    }
+
+    const { mode } = getDbStatus();
+
+    if (mode === 'mongodb') {
+      let Model: any;
+      switch (type) {
+        case 'gallery': Model = (await import('../models/GalleryImage')).GalleryImageModel; break;
+        case 'doctors': Model = (await import('../models/Doctor')).DoctorModel; break;
+        case 'services': Model = (await import('../models/Service')).ServiceModel; break;
+        case 'blogs': Model = (await import('../models/Blog')).BlogModel; break;
+        case 'feedbacks': Model = (await import('../models/Feedback')).FeedbackModel; break;
+        default: return res.status(400).json({ success: false, message: 'Invalid type' });
+      }
+
+      await Promise.all(items.map((item: any) => 
+        Model.findByIdAndUpdate(item.id, { order: item.order })
+      ));
+    } else {
+      const db = getFallbackDb();
+      let collection: any[];
+      switch (type) {
+        case 'gallery': collection = db.gallery || []; break;
+        case 'doctors': collection = db.doctors || []; break;
+        case 'services': collection = db.services || []; break;
+        case 'blogs': collection = db.blogs || []; break;
+        case 'feedbacks': collection = db.feedbacks || []; break;
+        default: return res.status(400).json({ success: false, message: 'Invalid type' });
+      }
+
+      items.forEach((updateItem: any) => {
+        const idx = collection.findIndex((el: any) => el.id === updateItem.id);
+        if (idx !== -1) {
+          collection[idx].order = updateItem.order;
+        }
+      });
+      saveFallbackDb(db);
+    }
+    
+    // Notify clients about the update
+    getIO().emit(`${type}_update`);
+    
+    res.status(200).json({ success: true, message: 'Order updated' });
+  } catch (error) {
+    console.error('Reorder error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update order' });
   }
 });
 

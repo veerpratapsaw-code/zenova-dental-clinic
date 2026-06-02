@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     let data;
     if (mode === 'mongodb') {
       const { FeedbackModel: Feedback } = await import('../models/Feedback');
-      const docs = await Feedback.find({ isApproved: true }).sort({ createdAt: -1 });
+      const docs = await Feedback.find({ isApproved: true }).sort({ order: 1, createdAt: -1 });
       data = docs.map((doc: any) => {
         const obj = doc.toJSON();
         obj.id = doc.id;
@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
     } else {
       const db = getFallbackDb();
       data = (db.feedbacks || []).filter(f => f.isApproved);
+      data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     res.status(200).json({ success: true, data });
   } catch (error) {

@@ -22,7 +22,9 @@ import {
   Settings as SettingsIcon,
   ClipboardList,
   Pencil,
-  Check
+  Check,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { Appointment, Inquiry } from '../../types';
 
@@ -223,6 +225,50 @@ export default function AdminDashboard() {
       console.error('Failed to fetch data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleMove = async (type: 'gallery' | 'doctors' | 'services' | 'blogs' | 'feedbacks', index: number, direction: 'up' | 'down') => {
+    let list: any[] = [];
+    let setList: any;
+
+    if (type === 'gallery') { list = [...gallery]; setList = setGallery; }
+    else if (type === 'doctors') { list = [...doctors]; setList = setDoctors; }
+    else if (type === 'services') { list = [...services]; setList = setServices; }
+    else if (type === 'blogs') { list = [...blogs]; setList = setBlogs; }
+    else if (type === 'feedbacks') { list = [...feedbacks]; setList = setFeedbacks; }
+
+    if (direction === 'up' && index > 0) {
+      const temp = list[index];
+      list[index] = list[index - 1];
+      list[index - 1] = temp;
+    } else if (direction === 'down' && index < list.length - 1) {
+      const temp = list[index];
+      list[index] = list[index + 1];
+      list[index + 1] = temp;
+    } else {
+      return;
+    }
+
+    setList(list);
+
+    const items = list.map((item, idx) => ({ id: item.id, order: idx }));
+    
+    try {
+      const res = await fetch('/api/admin/reorder', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ type, items })
+      });
+      if (!res.ok) {
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to reorder');
+      fetchData();
     }
   };
 
@@ -1174,7 +1220,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="divide-y divide-slate-100 dark:divide-white/5">
                     {blogs.length === 0 && <p className="p-6 text-slate-500 text-sm">No blogs published yet.</p>}
-                    {blogs.map(blog => (
+                    {blogs.map((blog, idx) => (
                       <div key={blog.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         {blog.imageUrl && (
                           <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
@@ -1187,6 +1233,12 @@ export default function AdminDashboard() {
                           <div className="flex items-center justify-between">
                             <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-200 dark:border-cyan-500/20">{blog.category}</span>
                             <div className="flex items-center gap-1">
+                              <button disabled={idx === 0} onClick={() => handleMove('blogs', idx, 'up')} className="p-1.5 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-colors disabled:opacity-30">
+                                <ArrowUp className="w-4 h-4" />
+                              </button>
+                              <button disabled={idx === blogs.length - 1} onClick={() => handleMove('blogs', idx, 'down')} className="p-1.5 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-colors disabled:opacity-30">
+                                <ArrowDown className="w-4 h-4" />
+                              </button>
                               <button onClick={() => handleEditBlog(blog)} className="p-1.5 text-slate-400 hover:text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-colors">
                                 <Pencil className="w-4 h-4" />
                               </button>
@@ -1300,7 +1352,7 @@ export default function AdminDashboard() {
                   </div>
                 )}
                 {feedbacks.length === 0 && <p className="text-slate-500 col-span-full">No feedbacks submitted yet.</p>}
-                {feedbacks.map((fb) => (
+                {feedbacks.map((fb, idx) => (
                   <div key={fb.id} className="bg-white dark:bg-[#0f0f23]/80 p-6 rounded-[24px] border border-slate-200 dark:border-white/10 shadow-sm flex flex-col">
                     <div className="flex justify-between items-start mb-4">
                       <div>
@@ -1315,6 +1367,12 @@ export default function AdminDashboard() {
                       <div className="flex flex-col items-end gap-2">
                         <span className="text-[10px] font-mono text-slate-400">{new Date(fb.createdAt).toLocaleDateString()}</span>
                         <div className="flex items-center gap-1">
+                          <button disabled={idx === 0} onClick={() => handleMove('feedbacks', idx, 'up')} className="p-1 text-slate-400 hover:text-blue-500 transition-colors disabled:opacity-30" title="Move Up">
+                            <ArrowUp className="w-4 h-4" />
+                          </button>
+                          <button disabled={idx === feedbacks.length - 1} onClick={() => handleMove('feedbacks', idx, 'down')} className="p-1 text-slate-400 hover:text-blue-500 transition-colors disabled:opacity-30" title="Move Down">
+                            <ArrowDown className="w-4 h-4" />
+                          </button>
                           <button onClick={() => handleEditFeedback(fb)} className="p-1 text-slate-400 hover:text-blue-500 transition-colors" title="Edit Feedback">
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -1356,7 +1414,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
                     {services.length === 0 && <p className="p-6 text-slate-500 text-sm">No services configured.</p>}
-                    {services.map(service => (
+                    {services.map((service, idx) => (
                       <div key={service.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         <div className="flex-1">
                           <h4 className="font-bold text-slate-900 dark:text-white mb-1">{service.title}</h4>
@@ -1370,6 +1428,12 @@ export default function AdminDashboard() {
                               Icon: {service.iconName}
                             </span>
                             <div className="flex items-center gap-1">
+                              <button disabled={idx === 0} onClick={() => handleMove('services', idx, 'up')} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors disabled:opacity-30">
+                                <ArrowUp className="w-4 h-4" />
+                              </button>
+                              <button disabled={idx === services.length - 1} onClick={() => handleMove('services', idx, 'down')} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors disabled:opacity-30">
+                                <ArrowDown className="w-4 h-4" />
+                              </button>
                               <button onClick={() => handleEditService(service)} className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-colors">
                                 <Pencil className="w-4 h-4" />
                               </button>
@@ -1558,7 +1622,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
                     {gallery.length === 0 && <p className="p-6 text-slate-500 text-sm">No gallery items configured.</p>}
-                    {gallery.map(item => (
+                    {gallery.map((item, idx) => (
                       <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         <img 
                           src={item.imageUrl || 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=600&auto=format&fit=crop'} 
@@ -1577,6 +1641,12 @@ export default function AdminDashboard() {
                             <p className="text-xs text-slate-500 mb-2">{item.category} • {item.spanClasses}</p>
                           </div>
                           <div className="flex items-center gap-1">
+                            <button disabled={idx === 0} onClick={() => handleMove('gallery', idx, 'up')} className="p-1.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-lg transition-colors disabled:opacity-30">
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <button disabled={idx === gallery.length - 1} onClick={() => handleMove('gallery', idx, 'down')} className="p-1.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-lg transition-colors disabled:opacity-30">
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
                             <button onClick={() => handleEditGallery(item)} className="p-1.5 text-slate-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-500/10 rounded-lg transition-colors">
                               <Pencil className="w-4 h-4" />
                             </button>
@@ -1629,7 +1699,7 @@ export default function AdminDashboard() {
                   </div>
                   <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-[600px] overflow-y-auto">
                     {doctors.length === 0 && <p className="p-6 text-slate-500 text-sm">No doctors configured.</p>}
-                    {doctors.map(item => (
+                    {doctors.map((item, idx) => (
                       <div key={item.id} className="p-6 flex gap-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group">
                         <img 
                           src={item.imageURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(item.name)}&background=E0E7FF&color=4F46E5&size=400`} 
@@ -1648,6 +1718,12 @@ export default function AdminDashboard() {
                             <p className="text-xs text-slate-500 mb-2">{item.role} • {item.experience}</p>
                           </div>
                           <div className="flex items-center gap-1">
+                            <button disabled={idx === 0} onClick={() => handleMove('doctors', idx, 'up')} className="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors disabled:opacity-30">
+                              <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <button disabled={idx === doctors.length - 1} onClick={() => handleMove('doctors', idx, 'down')} className="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors disabled:opacity-30">
+                              <ArrowDown className="w-4 h-4" />
+                            </button>
                             <button onClick={() => handleEditDoctor(item)} className="p-1.5 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors">
                               <Pencil className="w-4 h-4" />
                             </button>

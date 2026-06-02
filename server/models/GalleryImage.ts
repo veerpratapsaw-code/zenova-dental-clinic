@@ -5,6 +5,7 @@ export interface IGalleryImage extends Document {
   category: string;
   imageUrl: string;
   spanClasses: string;
+  order: number;
 }
 
 const GalleryImageSchema: Schema = new Schema(
@@ -12,7 +13,8 @@ const GalleryImageSchema: Schema = new Schema(
     title: { type: String, required: true },
     category: { type: String, required: true },
     imageUrl: { type: String, required: true },
-    spanClasses: { type: String, default: 'md:col-span-1 md:row-span-1' }
+    spanClasses: { type: String, default: 'md:col-span-1 md:row-span-1' },
+    order: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

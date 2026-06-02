@@ -11,7 +11,7 @@ router.get('/', async (req, res) => {
     const { mode } = getDbStatus();
     let data;
     if (mode === 'mongodb') {
-      const docs = await Blog.find().sort({ createdAt: -1 });
+      const docs = await Blog.find().sort({ order: 1, createdAt: -1 });
       data = docs.map(doc => {
         const obj = doc.toJSON();
         obj.id = doc.id;
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     } else {
       const db = getFallbackDb();
       data = db.blogs || [];
-      data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      data.sort((a: any, b: any) => (a.order || 0) - (b.order || 0) || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     res.status(200).json({ success: true, data });
   } catch (error) {

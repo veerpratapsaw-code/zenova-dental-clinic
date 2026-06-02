@@ -9,6 +9,7 @@ export interface IDoctor extends Document {
   education: string;
   bio: string;
   daysAvailable: string[];
+  order: number;
 }
 
 const DoctorSchema: Schema = new Schema(
@@ -20,7 +21,8 @@ const DoctorSchema: Schema = new Schema(
     specialty: { type: String, required: true },
     education: { type: String, required: true },
     bio: { type: String, required: true },
-    daysAvailable: { type: [String], default: [] }
+    daysAvailable: { type: [String], default: [] },
+    order: { type: Number, default: 0 }
   },
   { timestamps: true }
 );
