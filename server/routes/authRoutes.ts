@@ -5,7 +5,9 @@ import {
   getMe,
   createAdmin,
   getAdmins,
-  deleteAdmin
+  deleteAdmin,
+  getDemoStatus,
+  demoLogin
 } from '../controllers/authController';
 import { requireAuth, requireSuperAdmin } from '../middleware/authMiddleware';
 
@@ -14,6 +16,8 @@ const router = express.Router();
 // Public / Init
 router.post('/login', loginAdmin);
 router.post('/setup', setupInitialSuperAdmin);
+router.get('/demo-status', getDemoStatus);
+router.post('/demo-login', demoLogin);
 
 // Protected Auth state
 router.get('/me', requireAuth, getMe);

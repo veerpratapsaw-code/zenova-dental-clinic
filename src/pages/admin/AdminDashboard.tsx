@@ -75,6 +75,7 @@ export default function AdminDashboard() {
 
   // Settings form state
   const [priorityPriceInput, setPriorityPriceInput] = useState('');
+  const [demoMode, setDemoMode] = useState(false);
   const [emergencyPriceInput, setEmergencyPriceInput] = useState('');
   const [formFieldsSettings, setFormFieldsSettings] = useState({ requirePhone: true, requireDate: true, requireMessage: true });
   const [heroStatsInput, setHeroStatsInput] = useState({ yearsOfCare: 20, smilesDesigned: 12, successRate: 98 });
@@ -213,6 +214,7 @@ export default function AdminDashboard() {
           setSettingsData(json.data);
           setPriorityPriceInput(json.data.priorityPrice.toString());
           setEmergencyPriceInput(json.data.emergencyPrice.toString());
+          if (json.data.demoMode !== undefined) setDemoMode(json.data.demoMode);
           if (json.data.formFields) {
             setFormFieldsSettings(json.data.formFields);
           }
@@ -613,7 +615,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ 
           priorityPrice: Number(priorityPriceInput), 
           emergencyPrice: Number(emergencyPriceInput),
-          formFields: formFieldsSettings
+          formFields: formFieldsSettings,
+          demoMode
         })
       });
       if (res.ok) {
@@ -1521,6 +1524,18 @@ export default function AdminDashboard() {
                     <h3 className="font-black font-display text-lg text-slate-900 dark:text-white">Global Pricing Configuration</h3>
                   </div>
                   <div className="p-6 space-y-6">
+                    <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-4 flex items-center justify-between">
+                      <div>
+                        <h4 className="text-sm font-bold text-emerald-700 dark:text-emerald-400 mb-1">Public Demo Mode</h4>
+                        <p className="text-xs text-emerald-600/70 dark:text-emerald-400/70">Allow anyone with the link to bypass the login screen.</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" className="sr-only" checked={demoMode} onChange={(e) => setDemoMode(e.target.checked)} />
+                        <div className={`block w-12 h-7 rounded-full transition-colors ${demoMode ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                        <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${demoMode ? 'transform translate-x-5' : ''}`}></div>
+                      </label>
+                    </div>
+
                     <div className="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl p-4">
                       <h4 className="text-sm font-bold text-purple-700 dark:text-purple-400 mb-1">Priority Skip Fee</h4>
                       <p className="text-xs text-purple-600/70 dark:text-purple-400/70 mb-3">Amount charged to patients bypassing the standard queue.</p>

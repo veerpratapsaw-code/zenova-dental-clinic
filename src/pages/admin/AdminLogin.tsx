@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Lock, Mail, Loader2, AlertCircle, Rocket } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
@@ -10,8 +10,39 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [setupLoading, setSetupLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated, redirect
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/admin/dashboard');
+      return;
+    }
+
+    const checkDemoMode = async () => {
+      try {
+        const res = await fetch('/api/auth/demo-status');
+        const data = await res.json();
+        
+        if (data.success && data.demoMode) {
+          setLoading(true);
+          // Auto login if demo mode is on
+          const loginRes = await fetch('/api/auth/demo-login', { method: 'POST' });
+          const loginData = await loginRes.json();
+          
+          if (loginData.success) {
+            login(loginData.data.token, loginData.data.user);
+            navigate('/admin/dashboard');
+          }
+        }
+      } catch (err) {
+        console.error('Demo mode check failed', err);
+      }
+    };
+    
+    checkDemoMode();
+  }, [isAuthenticated, navigate, login]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

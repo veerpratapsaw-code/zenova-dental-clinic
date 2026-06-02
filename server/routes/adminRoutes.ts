@@ -605,17 +605,18 @@ router.delete('/services/:id', requireAuth, async (req, res) => {
 
 router.put('/settings', requireAuth, async (req, res) => {
   try {
-    const { priorityPrice, emergencyPrice, formFields } = req.body;
+    const { priorityPrice, emergencyPrice, formFields, demoMode } = req.body;
     const { mode } = getDbStatus();
     if (mode === 'mongodb') {
       const { SettingsModel: Settings } = await import('../models/Settings');
       let settings = await Settings.findOne();
       if (!settings) {
-        settings = await Settings.create({ priorityPrice, emergencyPrice, formFields });
+        settings = await Settings.create({ priorityPrice, emergencyPrice, formFields, demoMode });
       } else {
-        settings.priorityPrice = priorityPrice;
-        settings.emergencyPrice = emergencyPrice;
-        if (formFields) settings.formFields = formFields;
+        if (priorityPrice !== undefined) settings.priorityPrice = priorityPrice;
+        if (emergencyPrice !== undefined) settings.emergencyPrice = emergencyPrice;
+        if (formFields !== undefined) settings.formFields = formFields;
+        if (demoMode !== undefined) settings.demoMode = demoMode;
         await settings.save();
       }
       const data = settings.toJSON();
@@ -624,10 +625,11 @@ router.put('/settings', requireAuth, async (req, res) => {
       res.status(200).json({ success: true, data });
     } else {
       const db = getFallbackDb();
-      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500, formFields: { requirePhone: true, requireDate: true, requireMessage: true } };
+      if (!db.settings) db.settings = { priorityPrice: 1000, emergencyPrice: 3500, demoMode: false, formFields: { requirePhone: true, requireDate: true, requireMessage: true } };
       if (priorityPrice !== undefined) db.settings.priorityPrice = priorityPrice;
       if (emergencyPrice !== undefined) db.settings.emergencyPrice = emergencyPrice;
       if (formFields !== undefined) db.settings.formFields = formFields;
+      if (demoMode !== undefined) db.settings.demoMode = demoMode;
       saveFallbackDb(db);
       getIO().emit('settings_update');
       res.status(200).json({ success: true, data: db.settings });

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ISettings extends Document {
+  demoMode: boolean;
   priorityPrice: number;
   emergencyPrice: number;
   formFields: {
@@ -17,6 +18,7 @@ export interface ISettings extends Document {
 
 const SettingsSchema: Schema = new Schema(
   {
+    demoMode: { type: Boolean, default: false },
     priorityPrice: { type: Number, default: 1000 },
     emergencyPrice: { type: Number, default: 3500 },
     formFields: {

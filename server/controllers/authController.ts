@@ -60,6 +60,65 @@ export const loginAdmin = async (req: Request, res: Response): Promise<void> => 
   }
 };
 
+export const getDemoStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { mode } = getDbStatus();
+    let demoMode = false;
+    
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('../models/Settings');
+      const settings = await Settings.findOne();
+      if (settings) demoMode = settings.demoMode;
+    } else {
+      const db = getFallbackDb();
+      if (db.settings && db.settings.demoMode) demoMode = db.settings.demoMode;
+    }
+    
+    res.status(200).json({ success: true, demoMode });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+export const demoLogin = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { mode } = getDbStatus();
+    let demoMode = false;
+    
+    if (mode === 'mongodb') {
+      const { SettingsModel: Settings } = await import('../models/Settings');
+      const settings = await Settings.findOne();
+      if (settings) demoMode = settings.demoMode;
+    } else {
+      const db = getFallbackDb();
+      if (db.settings && db.settings.demoMode) demoMode = db.settings.demoMode;
+    }
+    
+    if (!demoMode) {
+      res.status(403).json({ success: false, message: 'Demo mode is not enabled' });
+      return;
+    }
+
+    // Generate a token for a fake demo user
+    const token = generateToken('demo_admin_id', 'superadmin');
+
+    res.status(200).json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: 'demo_admin_id',
+          email: 'demo@zenova.com',
+          role: 'superadmin'
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Demo Login error:', error);
+    res.status(500).json({ success: false, message: 'Server error during demo login' });
+  }
+};
+
 export const setupInitialSuperAdmin = async (req: Request, res: Response): Promise<void> => {
   try {
     const { mode } = getDbStatus();
