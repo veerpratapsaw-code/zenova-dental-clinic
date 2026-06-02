@@ -52,14 +52,35 @@ export const handleChat = async (req: Request, res: Response): Promise<void> => 
     // A robust implementation would map history to Gemini's format.
     const fullPrompt = `${SYSTEM_PROMPT}\n\nUser: ${message}`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: fullPrompt,
-        config: {
-            temperature: 0.7,
-            systemInstruction: SYSTEM_PROMPT,
+    let response;
+    let attempt = 0;
+    const maxRetries = 3;
+
+    while (attempt < maxRetries) {
+      try {
+        response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: fullPrompt,
+            config: {
+                temperature: 0.7,
+                systemInstruction: SYSTEM_PROMPT,
+            }
+        });
+        break; // Success
+      } catch (error: any) {
+        attempt++;
+        if (attempt >= maxRetries || !(error.message?.includes('429') || error.message?.includes('Too Many Requests') || error.status === 429)) {
+          throw error;
         }
-    });
+        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+        console.warn(`[Gemini API] Rate limit hit in Chat. Retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    if (!response) {
+      throw new Error("Failed to get response from AI");
+    }
 
     res.status(200).json({
       success: true,

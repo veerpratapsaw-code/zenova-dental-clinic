@@ -143,11 +143,30 @@ Return the result STRICTLY as a JSON object with this exact structure, no markdo
   "reasoning": "string"
 }`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { temperature: 0.2 }
-    });
+    let response;
+    let attempt = 0;
+    const maxRetries = 3;
+
+    while (attempt < maxRetries) {
+      try {
+        response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: { temperature: 0.2 }
+        });
+        break;
+      } catch (error: any) {
+        attempt++;
+        if (attempt >= maxRetries || !(error.message?.includes('429') || error.message?.includes('Too Many Requests') || error.status === 429)) {
+          throw error;
+        }
+        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+        console.warn(`[Gemini API] Rate limit hit in suggest-time. Retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    if (!response) throw new Error("Failed to get response from AI");
 
     let rawText = response.text.trim();
     if (rawText.startsWith('\`\`\`json')) rawText = rawText.replace(/\`\`\`json/g, '');
@@ -237,11 +256,30 @@ Do not use placeholders like [Your Name].
 
 Patient Inquiry: "${inquiryText}"`;
 
-    const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: { temperature: 0.6 }
-    });
+    let response;
+    let attempt = 0;
+    const maxRetries = 3;
+
+    while (attempt < maxRetries) {
+      try {
+        response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: prompt,
+            config: { temperature: 0.6 }
+        });
+        break;
+      } catch (error: any) {
+        attempt++;
+        if (attempt >= maxRetries || !(error.message?.includes('429') || error.message?.includes('Too Many Requests') || error.status === 429)) {
+          throw error;
+        }
+        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+        console.warn(`[Gemini API] Rate limit hit in draft. Retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+
+    if (!response) throw new Error("Failed to get response from AI");
 
     res.status(200).json({ success: true, draft: response.text });
   } catch (error) {
