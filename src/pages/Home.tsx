@@ -52,7 +52,7 @@ export default function Home() {
       <PageLoader />
       {/* Custom cursor removed */}
       <ScrollProgress />
-      <AIChatbot />
+      {/* <AIChatbot /> Temporarily disabled as per user request */}
 
       {/* 1. Header Navbar */}
       <Navbar onBookClick={handleBookNow} />
