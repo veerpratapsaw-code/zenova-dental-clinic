@@ -3,6 +3,7 @@ import { Calendar, Phone, Mail, User, BookOpen, MessageSquare, AlertCircle, Chec
 import { motion, AnimatePresence } from 'motion/react';
 import { ApiResponse, Appointment, Inquiry } from '../types';
 import { usePatientAuth } from '../context/PatientAuthContext';
+import { useSocket } from '../context/SocketContext';
 import PriorityUpgrade, { PriorityTier } from './PriorityUpgrade';
 
 interface BookingFormProps {
@@ -42,18 +43,28 @@ export default function BookingForm({ preselectedTreatment = '', onClearPreselec
   });
 
   const { patient } = usePatientAuth();
+  const { socket } = useSocket();
 
   // Fetch Form Customizer Settings
   useEffect(() => {
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(json => {
-        if (json.success && json.data?.formFields) {
-          setFormConfig(json.data.formFields);
-        }
-      })
-      .catch(console.error);
-  }, []);
+    const fetchSettings = () => {
+      fetch('/api/settings')
+        .then(res => res.json())
+        .then(json => {
+          if (json.success && json.data?.formFields) {
+            setFormConfig(json.data.formFields);
+          }
+        })
+        .catch(console.error);
+    };
+
+    fetchSettings();
+
+    if (socket) {
+      socket.on('settings_update', fetchSettings);
+      return () => { socket.off('settings_update', fetchSettings); };
+    }
+  }, [socket]);
 
   // Close dropdown on outside click
   useEffect(() => {

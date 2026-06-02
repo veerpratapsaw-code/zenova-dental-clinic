@@ -581,6 +581,7 @@ router.put('/settings', requireAuth, async (req, res) => {
       }
       const data = settings.toJSON();
       data.id = settings.id;
+      getIO().emit('settings_update');
       res.status(200).json({ success: true, data });
     } else {
       const db = getFallbackDb();

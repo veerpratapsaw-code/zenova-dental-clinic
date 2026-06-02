@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { CheckCircle2, Clock, Zap, AlertTriangle } from 'lucide-react';
+import { useSocket } from '../context/SocketContext';
 
 export type PriorityTier = 'standard' | 'priority' | 'emergency';
 
@@ -13,6 +14,8 @@ export default function PriorityUpgrade({ selectedTier, onSelectTier }: Priority
   const [queueStatus, setQueueStatus] = useState({ standard: 0, priority: 0 });
   const [settings, setSettings] = useState({ priorityPrice: 1000, emergencyPrice: 3500 });
   const [loading, setLoading] = useState(true);
+
+  const { socket } = useSocket();
 
   useEffect(() => {
     fetch('/api/appointments/queue-status')
@@ -27,16 +30,25 @@ export default function PriorityUpgrade({ selectedTier, onSelectTier }: Priority
       })
       .catch(console.error);
 
-    fetch('/api/settings')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setSettings(data.data);
-        }
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchSettings = () => {
+      fetch('/api/settings')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSettings(data.data);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    };
+
+    fetchSettings();
+
+    if (socket) {
+      socket.on('settings_update', fetchSettings);
+      return () => { socket.off('settings_update', fetchSettings); };
+    }
+  }, [socket]);
 
   // Calculate dynamic wait times
   // Assume each standard appointment takes ~45 mins. 
