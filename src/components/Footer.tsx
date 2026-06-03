@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Sparkles, Linkedin, Github, Twitter, Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function Footer() {
+function Footer() {
   const currentYear = new Date().getFullYear();
 
   const handleFooterLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
@@ -167,3 +167,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default memo(Footer);

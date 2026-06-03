@@ -6,6 +6,7 @@ import express from 'express';
 import path from 'path';
 import helmet from 'helmet';
 import cors from 'cors';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 // import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
@@ -39,6 +40,7 @@ app.use(helmet({
   contentSecurityPolicy: false, // Disable default CSP to allow Vite preview iframes to render correctly
   crossOriginEmbedderPolicy: false
 }));
+app.use(compression());
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));

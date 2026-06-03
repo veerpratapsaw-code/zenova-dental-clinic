@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Menu, X, Sparkles, Calendar, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTheme } from '../context/ThemeContext';
@@ -10,7 +10,7 @@ interface NavbarProps {
   onBookClick: () => void;
 }
 
-export default function Navbar({ onBookClick }: NavbarProps) {
+function Navbar({ onBookClick }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
@@ -283,3 +283,5 @@ export default function Navbar({ onBookClick }: NavbarProps) {
     </>
   );
 }
+
+export default memo(Navbar);
