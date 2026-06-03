@@ -256,7 +256,7 @@ app.post('/api/transit-estimate', async (req, res) => {
     const { GoogleGenAI } = await import('@google/genai');
     const ai = new GoogleGenAI({ apiKey });
     
-    const prompt = `Estimate the driving distance and travel time from "${startAddr}" to "City Center, Dhanbad, Jharkhand". 
+    const prompt = `Estimate the driving distance and travel time from "${startAddr}" to "Washington, DC". 
 Return the result STRICTLY as a JSON object with this exact structure, no markdown, no backticks:
 {
   "time": "e.g., 15 mins",

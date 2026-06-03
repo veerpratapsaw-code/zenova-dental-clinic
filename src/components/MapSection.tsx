@@ -25,9 +25,9 @@ export default function MapSection() {
         setDirections([
           `⏱ Estimated Travel Time: ~${data.time} from your location.`,
           `🛣 Distance: ~${data.distance}.`,
-          `Head towards the main arterial road leading to Bank More.`,
-          `Continue straight approaching City Center.`,
-          `Our clinic is located centrally inside the City Center complex. Ample parking is available in the basement.`
+          `Head towards the main arterial road leading to Downtown DC.`,
+          `Continue straight approaching Capitol Hill.`,
+          `Our clinic is located centrally inside the Capitol Hill complex. Ample parking is available in the basement.`
         ]);
       } else {
         throw new Error(data.message || 'Failed to estimate');
@@ -77,8 +77,8 @@ export default function MapSection() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-800 dark:text-white uppercase font-mono tracking-wide">Studio Address</h4>
-                  <p className="text-slate-700 dark:text-slate-300 text-sm font-semibold mt-1">Bank More, City Centre</p>
-                  <span className="text-xs text-slate-400 font-medium">Dhanbad, Jharkhand 826001</span>
+                  <p className="text-slate-700 dark:text-slate-300 text-sm font-semibold mt-1">Capitol Hill, Downtown</p>
+                  <span className="text-xs text-slate-400 font-medium">Washington, DC 20004</span>
                 </div>
               </div>
 
@@ -169,7 +169,7 @@ export default function MapSection() {
                     ))}
                     
                     <a
-                      href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startAddr)}&destination=City+Center,+Dhanbad,+Jharkhand`}
+                      href={`https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(startAddr)}&destination=Washington,+DC`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-4 w-full py-2.5 bg-blue-50 hover:bg-blue-100 dark:bg-blue-500/10 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 rounded-xl flex items-center justify-center gap-2 text-xs font-bold transition-colors cursor-pointer"
@@ -187,7 +187,7 @@ export default function MapSection() {
           {/* Embedded Google Map */}
           <div className="lg:col-span-7 rounded-[32px] border border-purple-200/50 overflow-hidden relative min-h-[400px] flex items-center justify-center shadow-xl bg-slate-950">
             <iframe 
-              src="https://maps.google.com/maps?q=City%20Center%20Dhanbad&t=&z=15&ie=UTF8&iwloc=&output=embed" 
+              src="https://maps.google.com/maps?q=Washington%20DC&t=&z=15&ie=UTF8&iwloc=&output=embed" 
               width="100%" 
               height="100%" 
               style={{ border: 0, position: 'absolute', top: 0, left: 0 }} 
