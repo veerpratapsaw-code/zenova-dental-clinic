@@ -50,9 +50,8 @@ export default function Home() {
     <>
       {/* Global Premium Effects Layer for Home Page */}
       <PageLoader />
-      {/* Custom cursor removed */}
       <ScrollProgress />
-      {/* <AIChatbot /> Temporarily disabled as per user request */}
+      <AIChatbot />
 
       {/* 1. Header Navbar */}
       <Navbar onBookClick={handleBookNow} />
